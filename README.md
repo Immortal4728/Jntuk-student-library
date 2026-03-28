@@ -17,7 +17,7 @@ A mobile-first web application for JNTUK students to:
 - Node.js (if used)
 
 ## 🌐 Live Demo
-[https://your-link.vercel.app](https://jntuk-student-library.vercel.app/)
+jntuk-student-library.vercel.app
 
 ## 📸 Screenshots
 (Add images)
