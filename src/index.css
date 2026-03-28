@@ -1,0 +1,366 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === Base Reset === */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text: #0f172a;
+  --color-text-secondary: #64748b;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* === Typography === */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* === Magnetic Button === */
+.btn-magnetic {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all 0.2s var(--ease-out-expo);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-magnetic:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background: #f1f5f9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.btn-ghost:hover {
+  background: #f1f5f9;
+  color: var(--color-text);
+}
+
+/* === Cards === */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  transition: all 0.2s var(--ease-out-expo);
+}
+
+.card-interactive:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transform: translateY(-1px);
+}
+
+.card-interactive:active {
+  transform: scale(0.97);
+}
+
+/* === Input === */
+.input-field {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s var(--ease-out-expo);
+}
+
+.input-field::placeholder {
+  color: #94a3b8;
+}
+
+.input-field:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* === Login Modal Backdrop === */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.3s var(--ease-out-expo) forwards;
+}
+
+.modal-card {
+  background: var(--color-surface);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.08);
+  animation: scaleIn 0.4s var(--ease-spring) forwards;
+}
+
+/* === Stagger Children === */
+.stagger-children > * {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: slideUp 0.5s var(--ease-out-expo) forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* === Search bar === */
+.search-container {
+  position: relative;
+}
+
+.search-container svg {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  transition: color 0.3s;
+  pointer-events: none;
+}
+
+.search-container input:focus ~ svg,
+.search-container:focus-within svg {
+  color: var(--color-accent);
+}
+
+/* === Badge === */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.badge-important {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.badge-notes {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.badge-pyq {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+/* === Page transitions === */
+.page-enter {
+  animation: slideUp 0.3s var(--ease-out-expo) forwards;
+}
+
+/* === Floating elements === */
+.float-element {
+  animation: float 6s ease-in-out infinite;
+}
+
+.float-element-delayed {
+  animation: float 6s ease-in-out 2s infinite;
+}
+
+/* === Semester card gradient line === */
+.semester-accent {
+  position: relative;
+  overflow: hidden;
+}
+
+.semester-accent::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--color-accent), #60a5fa);
+  border-radius: 0 2px 2px 0;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out-expo);
+}
+
+.semester-accent:hover::before {
+  opacity: 1;
+}
+
+/* === Tab underline === */
+.tab-active {
+  position: relative;
+}
+
+.tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-accent);
+  border-radius: 999px;
+  animation: slideUp 0.3s var(--ease-out-expo) forwards;
+}
+
+/* === Loading skeleton === */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+/* === Mobile touch feedback === */
+@media (hover: none) {
+  .card-interactive:active {
+    background: #f8fafc;
+    transform: scale(0.97);
+  }
+
+  .btn-magnetic:active {
+    transform: scale(0.95);
+  }
+}
+
+/* === File type icon colors === */
+.file-pdf { color: #dc2626; }
+.file-doc { color: #2563eb; }
+.file-link { color: #7c3aed; }
+
+/*
+ * See: https://fonts.google.com/license/googlerestricted
+ */
+/* fallback */
+@font-face {
+  font-family: 'Google Symbols';
+  font-style: normal;
+  font-weight: 300;
+  font-display: block;
+  src: url(https://fonts.gstatic.com/s/googlesymbols/v413/HhyqU5Ak9u-oMExPeInvcuEmPosC9zS3FYkFU68cPrjdKM1XMoDZlWmzc3IiWvF1R4oJxQmdBnupCeyl.woff2) format('woff2');
+}
+
+.google-symbols {
+  font-family: 'Google Symbols';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
