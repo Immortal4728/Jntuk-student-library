@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { getDisplaySemester } from "../lib/utils";
 import {
   Search,
   BookOpen,
@@ -29,74 +30,87 @@ type Subject = {
   units: SubjectUnits;
 };
 
+// --- Dictionary Data ---
+const subjectsData: Record<string, Record<string, string[]>> = {
+  CSE: {
+    "2-1": ["Universal Human Values", "Discrete Mathematics", "Digital Logic", "Data Structures", "OOPs with Java"],
+    "2-2": ["MEFA", "Probability & Statistics", "DBMS", "Operating Systems", "Software Engineering"],
+    "3-1": ["Data Warehousing", "Formal Languages", "Computer Networks", "Artificial Intelligence", "EDVC"],
+    "3-2": ["Compiler Design", "Cloud Computing", "Network Security", "Machine Learning", "Software Project Mgmt", "MPMC"]
+  },
+  IT: {
+    "2-1": ["Discrete Mathematics", "Universal Human Values", "Digital Logic", "Data Structures", "Java"],
+    "2-2": ["Optimization", "Probability & Statistics", "Operating Systems", "DBMS", "Software Engineering"],
+    "3-1": ["Advanced Java", "Computer Networks", "Compiler Design", "Data Warehousing", "Electronics"],
+    "3-2": ["Machine Learning", "Software Methodology", "Software Project Mgmt", "Network Security", "Cloud Computing", "MPMC"]
+  },
+  ECE: {
+    "2-1": ["Probability & Stochastic", "Universal Human Values", "Signals & Systems", "Electronic Devices", "Logic Design"],
+    "2-2": ["MEFA", "Control Systems", "Electromagnetic Waves", "Circuit Analysis", "Analog Communication"],
+    "3-1": ["IC Applications", "Digital Communications", "Antennas & Propagation", "Measurements", "Computer Architecture"],
+    "3-2": ["VLSI Design", "Digital Signal Processing", "Machine Learning", "Microcontrollers", "Embedded Systems", "DBMS"]
+  },
+  AIML: {}
+};
+
+const commonFirstYear: Record<string, string[]> = {
+  "1-1": [
+    "Communicative English",
+    "Engineering Chemistry",
+    "Linear Algebra & Calculus",
+    "Basic Civil & Mechanical Engineering",
+    "Introduction to Programming (C)"
+  ],
+  "1-2": [
+    "Engineering Physics",
+    "Differential Equations & Vector Calculus",
+    "Basic Electrical and Engineering",
+    "Engineering Graphics",
+    "Data Structures"
+  ]
+};
+
 export default function DashboardMaterialsPage() {
   const { profile } = useAuth();
-
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSubjects, setExpandedSubjects] = useState<string[]>([]);
 
-  // --- Mock Data (in production: fetched from Firestore based on profile.branch + profile.semester) ---
-  const subjects: Subject[] = [
-    {
-      id: "s1",
-      name: "Compiler Design",
-      branch: profile.branch,
-      semester: profile.semester,
-      units: {
-        unit1: "link_to_file",
-        unit2: "link_to_file",
-        unit3: "link_to_file",
-        unit4: "link_to_file",
-        unit5: "link_to_file",
-        important: "link_to_file",
-      },
-    },
-    {
-      id: "s2",
-      name: "Machine Learning",
-      branch: profile.branch,
-      semester: profile.semester,
-      units: {
-        unit1: "link_to_file",
-        unit2: "link_to_file",
-      },
-    },
-    {
-      id: "s3",
-      name: "Web Technologies",
-      branch: profile.branch,
-      semester: profile.semester,
-      units: {
-        unit1: "link_to_file",
-        important: "link_to_file",
-      },
-    },
-    {
-      id: "s4",
-      name: "Computer Networks",
-      branch: profile.branch,
-      semester: profile.semester,
-      units: {
-        unit1: "link_to_file",
-        unit2: "link_to_file",
-        unit3: "link_to_file",
-        unit5: "link_to_file",
-        important: "link_to_file",
-      },
-    },
-    {
-      id: "s5",
-      name: "Software Engineering",
-      branch: profile.branch,
-      semester: profile.semester,
-      units: {
-        unit1: "link_to_file",
-        unit2: "link_to_file",
-        unit3: "link_to_file",
-        unit4: "link_to_file",
-      },
-    },
-  ];
+  useEffect(() => {
+    if (!profile) return;
+    
+    // Clear state before hydrating new ones to guarantee reactivity feel
+    setSubjects([]);
+
+    const fetchMaterials = (branch: string, semester: string) => {
+      const currentSemLabel = getDisplaySemester(semester || '1-1');
+
+      let data: string[] = [];
+      if (currentSemLabel.startsWith('1-')) {
+        data = commonFirstYear[currentSemLabel] || [];
+      } else {
+        data = subjectsData[branch]?.[currentSemLabel] || [];
+      }
+
+      const mapped: Subject[] = data.map((name) => ({
+        id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        name,
+        branch,
+        semester,
+        units: {
+          // Mock units to populate visually, just as requested
+          unit1: "link_to_file",
+          unit2: "link_to_file",
+          unit3: "link_to_file",
+          important: "link_to_file"
+        }
+      }));
+
+      setSubjects(mapped);
+    };
+
+    fetchMaterials(profile.branch, profile.semester);
+  }, [profile?.branch, profile?.semester]); // specifically trace branch and semester hooks
 
   const unitSlots = [
     { key: "unit1", label: "Unit 1" },
@@ -125,7 +139,7 @@ export default function DashboardMaterialsPage() {
           Materials
         </h1>
         <p className="text-slate-500 mt-1 text-sm">
-          {profile.branch} • Semester {profile.semester.replace("S", "")} — Browse and download your study materials.
+          {profile?.branch} • {getDisplaySemester(profile?.semester || "")} Sem — Browse and download your study materials.
         </p>
       </header>
 
@@ -271,7 +285,7 @@ export default function DashboardMaterialsPage() {
             <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-20" />
             <p className="font-medium">No subjects found.</p>
             <p className="text-xs mt-1 text-slate-400">
-              Try a different search term.
+              Your specific branch/semester might not have materials uploaded yet.
             </p>
           </div>
         )}

@@ -15,6 +15,7 @@ import {
   Pencil,
 } from "lucide-react";
 import { Button } from "./ui/button";
+import { getDisplaySemester } from "../lib/utils";
 
 interface DashboardSidebarProps {
   onOpenBacklogModal: () => void;
@@ -85,7 +86,7 @@ export default function DashboardSidebar({
             onClick={onOpenContextSwitcher}
             className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-900 text-white rounded-full text-[11px] font-semibold shadow-sm hover:bg-slate-800 transition-colors"
           >
-            {profile.branch} • {profile.semester}
+            {profile.branch} • {getDisplaySemester(profile.semester)} Sem
             <Pencil className="w-2.5 h-2.5 opacity-60" />
           </button>
           <button
@@ -140,7 +141,7 @@ export default function DashboardSidebar({
             </p>
           )}
           <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full mt-2">
-            {profile.branch} • Semester {profile.semester.replace("S", "")}
+            {profile.branch} • {getDisplaySemester(profile.semester)} Sem
           </span>
 
           <div className="flex gap-2 w-full mt-3">

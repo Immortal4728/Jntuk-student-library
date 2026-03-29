@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import Layout from './components/Layout';
 import DashboardLayout from './components/DashboardLayout';
+import ScrollToTop from './components/ScrollToTop';
 import HomePage from './pages/HomePage';
 import MaterialsPage from './pages/MaterialsPage';
 import SemesterListPage from './pages/SemesterListPage';
@@ -35,6 +36,7 @@ export default function App() {
   return (
     <AuthProvider>
       <LoginModalProvider>
+        <ScrollToTop />
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
@@ -82,15 +84,17 @@ export default function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute requireAdmin={true}>
-                  <AdminDashboardPage />
-                </ProtectedRoute>
-              } 
-            />
           </Route>
+
+          {/* ADMIN ROUTE (standalone, no student sidebar) */}
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminDashboardPage />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </LoginModalProvider>
     </AuthProvider>

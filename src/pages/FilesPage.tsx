@@ -1,204 +1,204 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { Flame, FileText, ClipboardList, Download, ExternalLink, BookOpen, ChevronRight } from 'lucide-react';
-import { insforge } from '../lib/insforge';
+import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { FileText, Download, Eye, ChevronRight, ArrowLeft, AlertCircle } from 'lucide-react';
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { getDisplaySemester } from "../lib/utils";
 
 interface Material {
   id: string;
   title: string;
-  type: 'notes' | 'pyq' | 'important';
-  file_url: string | null;
-  external_link: string | null;
-  description: string | null;
-  year: string | null;
+  fileURL: string;
 }
 
-interface Subject {
-  id: string;
-  name: string;
-  code: string | null;
-}
+const subjectsData: Record<string, Record<string, string[]>> = {
+  CSE: {
+    "2-1": ["Universal Human Values", "Discrete Mathematics", "Digital Logic", "Data Structures", "OOPs with Java"],
+    "2-2": ["MEFA", "Probability & Statistics", "DBMS", "Operating Systems", "Software Engineering"],
+    "3-1": ["Data Warehousing", "Formal Languages", "Computer Networks", "Artificial Intelligence", "EDVC"],
+    "3-2": ["Compiler Design", "Cloud Computing", "Network Security", "Machine Learning", "Software Project Mgmt", "MPMC"]
+  },
+  IT: {
+    "2-1": ["Discrete Mathematics", "Universal Human Values", "Digital Logic", "Data Structures", "Java"],
+    "2-2": ["Optimization", "Probability & Statistics", "Operating Systems", "DBMS", "Software Engineering"],
+    "3-1": ["Advanced Java", "Computer Networks", "Compiler Design", "Data Warehousing", "Electronics"],
+    "3-2": ["Machine Learning", "Software Methodology", "Software Project Mgmt", "Network Security", "Cloud Computing", "MPMC"]
+  },
+  ECE: {
+    "2-1": ["Probability & Stochastic", "Universal Human Values", "Signals & Systems", "Electronic Devices", "Logic Design"],
+    "2-2": ["MEFA", "Control Systems", "Electromagnetic Waves", "Circuit Analysis", "Analog Communication"],
+    "3-1": ["IC Applications", "Digital Communications", "Antennas & Propagation", "Measurements", "Computer Architecture"],
+    "3-2": ["VLSI Design", "Digital Signal Processing", "Machine Learning", "Microcontrollers", "Embedded Systems", "DBMS"]
+  },
+  AIML: {
+  }
+};
 
-type TabType = 'important' | 'notes' | 'pyq';
+const commonFirstYear: Record<string, string[]> = {
+  "1-1": [
+    "Communicative English",
+    "Engineering Chemistry",
+    "Linear Algebra & Calculus",
+    "Basic Civil & Mechanical Engineering",
+    "Introduction to Programming (C)"
+  ],
+  "1-2": [
+    "Engineering Physics",
+    "Differential Equations & Vector Calculus",
+    "Basic Electrical and Engineering",
+    "Engineering Graphics",
+    "Data Structures"
+  ]
+};
 
-const tabs: { key: TabType; label: string; icon: typeof Flame }[] = [
-  { key: 'important', label: 'Important', icon: Flame },
-  { key: 'notes', label: 'Notes', icon: FileText },
-  { key: 'pyq', label: 'PYQs', icon: ClipboardList },
-];
+const getOriginalSubjectName = (branch: string, semesterNumber: string, subjectSlug: string): string => {
+  const currentSemLabel = getDisplaySemester(semesterNumber || '1-1');
+  
+  let subjectsList: string[] = [];
+  if (currentSemLabel.startsWith('1-')) {
+    subjectsList = commonFirstYear[currentSemLabel] || [];
+  } else {
+    subjectsList = subjectsData[branch]?.[currentSemLabel] || [];
+  }
+
+  const found = subjectsList.find(s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-') === subjectSlug);
+  return found || subjectSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+};
 
 export default function FilesPage() {
   const { branch, semesterNumber, subjectId } = useParams();
-  const [subject, setSubject] = useState<Subject | null>(null);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
   const [materials, setMaterials] = useState<Material[]>([]);
-  const [activeTab, setActiveTab] = useState<TabType>('important');
   const [loading, setLoading] = useState(true);
 
+  const view = searchParams.get('view') || 'unit-1';
+
+  const branchUpper = branch?.toUpperCase() || 'CSE';
+  const originalSubjectName = getOriginalSubjectName(branchUpper, semesterNumber || '1', subjectId || '');
+
   useEffect(() => {
-    loadData();
-  }, [subjectId]);
+    const fetchMaterials = async () => {
+      setLoading(true);
+      try {
+        const q = query(
+          collection(db, "materials"),
+          where("branch", "==", branchUpper),
+          where("semester", "==", semesterNumber),
+          where("subject", "==", originalSubjectName),
+          where("unit", "==", view)
+        );
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const { data: subData } = await insforge.database
-        .from('subjects')
-        .select('id, name, code')
-        .eq('id', subjectId)
-        .maybeSingle();
-      if (subData) setSubject(subData as Subject);
+        const querySnapshot = await getDocs(q);
+        const docs = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Material[];
+        
+        setMaterials(docs);
+      } catch (err) {
+        console.error('Failed to load materials:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      const { data, error } = await insforge.database
-        .from('materials')
-        .select('*')
-        .eq('subject_id', subjectId)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-      if (!error && data) setMaterials(data as Material[]);
-    } catch (err) {
-      console.error('Failed to load:', err);
-    } finally {
-      setLoading(false);
-    }
+    fetchMaterials();
+  }, [branchUpper, semesterNumber, originalSubjectName, view]);
+
+  const formatViewName = (str: string) => {
+    if (str.startsWith('unit-')) return `Unit ${str.split('-')[1]}`;
+    if (str === 'important-qs') return 'Important Questions';
+    if (str === 'prev-papers') return 'Previous Papers';
+    return str;
   };
 
-  const filtered = materials.filter((m) => m.type === activeTab);
-
-  const typeColor: Record<TabType, string> = {
-    important: '#ef4444',
-    notes: '#2563eb',
-    pyq: '#16a34a',
-  };
+  const viewName = formatViewName(view);
 
   return (
-    <div className="bg-[#f8fafc] min-h-[calc(100vh-3.5rem)]">
-      <div className="max-w-5xl mx-auto px-5 pt-16 pb-20">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 mb-4 text-[0.75rem] font-medium text-[#94a3b8] flex-wrap">
-          <Link to="/materials" className="hover:text-[#64748b] transition-colors">Materials</Link>
-          <ChevronRight size={12} />
-          <Link to={`/materials/${branch}`} className="hover:text-[#64748b] transition-colors">{branch}</Link>
-          <ChevronRight size={12} />
-          <Link to={`/materials/${branch}/semester/${semesterNumber}`} className="hover:text-[#64748b] transition-colors">
-            Sem {semesterNumber}
-          </Link>
-          <ChevronRight size={12} />
-          <span className="text-[#2563eb] truncate max-w-[140px]">{subject?.name || '...'}</span>
-        </div>
+    <div className="bg-[#f8fafc] min-h-[calc(100vh-4rem)] relative">
+      <div className="max-w-3xl mx-auto px-5 pt-10 pb-32">
+        {/* Navigation & Header Area */}
+        <div className="flex flex-col gap-5 mb-10">
+          <button 
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 active:scale-90 transition-all shadow-sm self-start"
+            aria-label="Go back"
+          >
+            <ArrowLeft size={20} strokeWidth={2.5} />
+          </button>
+          
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold tracking-[0.2em] uppercase text-slate-500">
+             <Link to={`/materials/${branch}/semester/${semesterNumber}`} className="hover:text-indigo-600 transition-colors">
+               SEM {semesterNumber}
+             </Link>
+             <ChevronRight size={12} strokeWidth={2.5} className="text-slate-300" />
+             <span className="text-slate-900 truncate max-w-[150px] sm:max-w-none">{originalSubjectName}</span>
+          </div>
 
-        {/* Header */}
-        {loading ? (
-          <div className="h-8 w-48 bg-white border border-[#e5e7eb] rounded-lg animate-pulse" />
-        ) : subject ? (
-          <>
-            <h1 className="text-[1.75rem] sm:text-[2rem] font-bold text-[#0f172a] tracking-tight">
-              {subject.name}
+          <div className="mt-2">
+            <h1 className="text-[2rem] sm:text-[2.75rem] font-bold text-slate-900 tracking-tight leading-[1.1] mb-2.5">
+              {viewName}
             </h1>
-            {subject.code && (
-              <p className="text-[0.8125rem] text-[#94a3b8] mt-1 font-mono">{subject.code}</p>
-            )}
-          </>
-        ) : (
-          <h1 className="text-[1.5rem] font-bold text-[#0f172a]">Subject not found</h1>
-        )}
-
-        {/* Tabs */}
-        <div className="mt-8 flex gap-1 p-1 bg-white border border-[#e5e7eb] rounded-xl">
-          {tabs.map((tab) => {
-            const count = materials.filter((m) => m.type === tab.key).length;
-            const isActive = activeTab === tab.key;
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[0.8125rem] font-semibold transition-all active:scale-[0.97] ${
-                  isActive
-                    ? 'bg-[#f8fafc] text-[#0f172a] shadow-sm'
-                    : 'text-[#94a3b8] hover:text-[#64748b]'
-                }`}
-              >
-                <Icon size={14} />
-                {tab.label}
-                {count > 0 && (
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                      isActive ? 'bg-[#2563eb]/[0.08] text-[#2563eb]' : 'bg-[#f1f5f9] text-[#94a3b8]'
-                    }`}
-                  >
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+            <p className="text-[1.0625rem] font-medium text-slate-500">
+              Access your files instantly below
+            </p>
+          </div>
         </div>
 
-        {/* Materials list */}
-        <div className="mt-6 space-y-2">
+        {/* Materials List */}
+        <div className="flex flex-col gap-4">
           {loading ? (
             [...Array(3)].map((_, i) => (
-              <div key={i} className="h-[72px] bg-white border border-[#e5e7eb] rounded-xl animate-pulse" />
+              <div key={i} className="bg-white rounded-[1.25rem] border border-slate-200 p-5 h-[5.5rem] animate-pulse" />
             ))
-          ) : filtered.length === 0 ? (
-            <div className="py-20 text-center">
-              <BookOpen size={36} className="mx-auto text-[#cbd5e1] mb-3" />
-              <p className="text-[0.875rem] font-medium text-[#64748b]">
-                No {activeTab === 'pyq' ? 'PYQs' : activeTab} available yet
+          ) : materials.length === 0 ? (
+            <div className="bg-white rounded-[1.25rem] border border-slate-200 py-16 flex flex-col items-center justify-center text-center shadow-sm">
+              <div className="w-16 h-16 rounded-[1.25rem] bg-indigo-50/50 border border-indigo-100 flex items-center justify-center mb-5">
+                <AlertCircle size={28} className="text-indigo-400" />
+              </div>
+              <h3 className="text-[1.125rem] font-bold text-slate-900 tracking-tight">No files uploaded yet</h3>
+              <p className="text-[0.875rem] font-medium text-slate-500 mt-2 max-w-xs">
+                Check back soon or request them from an admin.
               </p>
-              <p className="text-[0.75rem] text-[#94a3b8] mt-1">Check back later</p>
             </div>
           ) : (
-            filtered.map((mat) => {
-              const href = mat.file_url || mat.external_link;
-              const isExternal = !!mat.external_link && !mat.file_url;
-              const color = typeColor[mat.type];
-
-              return (
-                <div
-                  key={mat.id}
-                  className="bg-white border border-[#e5e7eb] rounded-xl p-4 flex items-start gap-3"
-                >
-                  <div className="mt-0.5" style={{ color }}>
-                    {mat.type === 'important' ? (
-                      <Flame size={18} />
-                    ) : mat.type === 'pyq' ? (
-                      <ClipboardList size={18} />
-                    ) : (
-                      <FileText size={18} />
-                    )}
+            materials.map((mat) => (
+              <div 
+                key={mat.id}
+                className="bg-white rounded-[1.25rem] border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-5 group"
+              >
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+                    <FileText size={24} strokeWidth={2.5} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-[0.9375rem] font-semibold text-[#0f172a] leading-snug">
-                      {mat.title}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      {mat.year && (
-                        <span className="text-[0.6875rem] text-[#94a3b8] font-mono">{mat.year}</span>
-                      )}
-                      {mat.description && (
-                        <span className="text-[0.75rem] text-[#94a3b8]">{mat.description}</span>
-                      )}
-                    </div>
-                  </div>
-                  {href && (
-                    <a
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[0.75rem] font-semibold active:scale-[0.95] transition-all ${
-                        isExternal
-                          ? 'bg-white border border-[#e5e7eb] text-[#64748b] hover:bg-[#f8fafc]'
-                          : 'bg-[#2563eb] text-white hover:bg-[#1d4ed8] shadow-sm'
-                      }`}
-                    >
-                      {isExternal ? <ExternalLink size={13} /> : <Download size={13} />}
-                      {isExternal ? 'Open' : 'Download'}
-                    </a>
-                  )}
+                  <h3 className="text-[1.0625rem] font-bold text-slate-900 truncate pr-2">
+                    {mat.title}
+                  </h3>
                 </div>
-              );
-            })
+                
+                <div className="flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+                  <a
+                    href={mat.fileURL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[0.875rem] transition-colors"
+                  >
+                    <Eye size={18} strokeWidth={2.5} />
+                    Preview
+                  </a>
+                  <a
+                    href={mat.fileURL}
+                    download
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[0.875rem] transition-colors shadow-sm shadow-indigo-200"
+                  >
+                    <Download size={18} strokeWidth={2.5} />
+                    Download
+                  </a>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>

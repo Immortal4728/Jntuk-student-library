@@ -34,11 +34,7 @@ export default function Footer() {
           label: "Email",
         },
       ]}
-      navLinks={[
-        { label: "Home", href: "/" },
-        { label: "Materials", href: "/materials" },
-        { label: "About", href: "/about" },
-      ]}
+
       creatorName="Rishi Chowdary"
       creatorUrl="https://github.com"
       brandIcon={
