@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard, Users, BookOpen, Upload, LogOut, Trash2,
   CheckCircle, AlertCircle, Loader2, FileUp, Search, Shield,
-  UserX, UserCheck
+  UserX, UserCheck, ChevronRight, Eye, Download, X
 } from "lucide-react";
 import { db, storage } from "../lib/firebase";
 import {
@@ -13,6 +13,7 @@ import {
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { subjectsData, commonFirstYear } from "../lib/data";
 import { normalizeSemester } from "../lib/utils";
+import "./AdminDashboardPage.css";
 
 // ─── Constants ───
 const BRANCHES = ["CSE", "ECE", "IT", "AIML"];
@@ -39,12 +40,6 @@ function getSubjects(branch: string, semester: string): string[] {
   return subjectsData[branch]?.[semester] || [];
 }
 
-// ─── Shared Styles ───
-const inputClass = "w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 transition-all";
-const selectClass = inputClass + " cursor-pointer";
-const thClass = "px-4 py-2.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider";
-const tdClass = "px-4 py-3 text-sm text-slate-700";
-
 // ═══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════
@@ -52,83 +47,89 @@ export default function AdminDashboardPage() {
   const { user, signOut, isAdmin } = useAuth();
   const [tab, setTab] = useState("dashboard");
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  const [globalSearch, setGlobalSearch] = useState("");
 
   const flash = (msg: string, ok = true) => {
     setToast({ msg, ok });
-    setTimeout(() => setToast(null), 3000);
+    setTimeout(() => setToast(null), 3500);
   };
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center">
-          <Shield className="w-12 h-12 text-red-300 mx-auto mb-3" />
-          <p className="text-red-600 font-bold text-lg">Access Denied</p>
-          <p className="text-sm text-slate-500 mt-1">Admin privileges required.</p>
+      <div className="admin-denied">
+        <div className="admin-denied-inner">
+          <Shield />
+          <h2>Access Denied</h2>
+          <p>Admin privileges required.</p>
         </div>
       </div>
     );
   }
 
+  const initials = (user?.email || "A").charAt(0).toUpperCase();
+
   return (
-    <div className="flex h-screen bg-[#f4f5f7] overflow-hidden">
+    <div className="admin-root">
       {/* ─── SIDEBAR ─── */}
-      <aside className="w-[220px] bg-[#0f172a] flex flex-col shrink-0">
-        <div className="p-5 pb-6">
-          <h1 className="text-[14px] font-bold text-white tracking-tight">JNTUK Admin</h1>
-          <p className="text-[11px] text-slate-500 mt-0.5">Control Center</p>
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-brand">
+          <h1>JNTUK Admin</h1>
+          <p>Control Center</p>
         </div>
 
-        <nav className="flex-1 px-3 space-y-1">
+        <nav className="admin-nav">
           {NAV.map(item => (
             <button
               key={item.id}
               onClick={() => setTab(item.id)}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold transition-colors ${
-                tab === item.id
-                  ? "bg-white/10 text-white"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-              }`}
+              className={`admin-nav-item ${tab === item.id ? "active" : ""}`}
             >
-              <item.icon className="w-4 h-4" /> {item.label}
+              <item.icon /> {item.label}
             </button>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-slate-800">
-          <p className="text-[11px] text-slate-500 truncate mb-3 px-1">{user?.email}</p>
-          <button
-            onClick={signOut}
-            className="w-full flex items-center justify-center gap-1.5 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-[11px] font-bold transition-colors"
-          >
-            <LogOut className="w-3 h-3" /> Sign Out
+        <div className="admin-sidebar-footer">
+          <p className="admin-sidebar-email">{user?.email}</p>
+          <button onClick={signOut} className="admin-signout-btn">
+            <LogOut style={{ width: 13, height: 13 }} /> Sign Out
           </button>
         </div>
       </aside>
 
       {/* ─── MAIN ─── */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="admin-main">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-slate-200 h-14 flex items-center px-7 shadow-sm">
-          <h2 className="text-[15px] font-bold text-slate-800">
+        <div className="admin-header">
+          <h2 className="admin-header-title">
             {NAV.find(n => n.id === tab)?.label}
           </h2>
+          <div className="admin-header-right">
+            <div className="admin-search-box">
+              <Search />
+              <input
+                type="text"
+                value={globalSearch}
+                onChange={e => setGlobalSearch(e.target.value)}
+                placeholder="Search anything..."
+              />
+            </div>
+            <div className="admin-avatar">{initials}</div>
+          </div>
         </div>
 
         {/* Toast */}
         {toast && (
-          <div className={`mx-7 mt-5 px-4 py-2.5 rounded-lg border flex items-center gap-2 text-sm font-semibold ${
-            toast.ok ? "bg-emerald-50 border-emerald-200 text-emerald-800" : "bg-red-50 border-red-200 text-red-700"
-          }`}>
-            {toast.ok ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+          <div className={`admin-toast ${toast.ok ? "ok" : "err"}`}>
+            {toast.ok ? <CheckCircle style={{ width: 16, height: 16 }} /> : <AlertCircle style={{ width: 16, height: 16 }} />}
             {toast.msg}
           </div>
         )}
 
-        <div className="p-7">
+        <div className="admin-content">
           {tab === "dashboard" && <DashboardTab />}
-          {tab === "users" && <UsersTab flash={flash} />}
-          {tab === "materials" && <MaterialsTab flash={flash} />}
+          {tab === "users" && <UsersTab flash={flash} globalSearch={globalSearch} />}
+          {tab === "materials" && <MaterialsTab flash={flash} globalSearch={globalSearch} />}
           {tab === "upload" && <UploadTab flash={flash} />}
         </div>
       </main>
@@ -140,8 +141,10 @@ export default function AdminDashboardPage() {
 // PAGE 1: DASHBOARD
 // ═══════════════════════════════════════════════════════════════
 function DashboardTab() {
-  const [stats, setStats] = useState({ users: 0, materials: 0, backlogs: 0 });
+  const [stats, setStats] = useState({ users: 0, materials: 0, backlogs: 0, downloads: 0 });
   const [loading, setLoading] = useState(true);
+  const [branchCounts, setBranchCounts] = useState<Record<string, number>>({});
+  const [semCounts, setSemCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     (async () => {
@@ -151,46 +154,107 @@ function DashboardTab() {
           getDocs(collection(db, "materials")),
         ]);
 
-        // Count backlogs across all user profiles
         let backlogCount = 0;
+        const bc: Record<string, number> = {};
         uSnap.docs.forEach(d => {
           const data = d.data();
           if (data.backlogs && Array.isArray(data.backlogs)) {
             backlogCount += data.backlogs.length;
           }
+          const branch = data.branch || "Other";
+          bc[branch] = (bc[branch] || 0) + 1;
         });
 
-        setStats({ users: uSnap.size, materials: mSnap.size, backlogs: backlogCount });
+        const sc: Record<string, number> = {};
+        mSnap.docs.forEach(d => {
+          const data = d.data();
+          const sem = normalizeSemester(data.semester) || "?";
+          sc[sem] = (sc[sem] || 0) + 1;
+        });
+
+        setStats({ users: uSnap.size, materials: mSnap.size, backlogs: backlogCount, downloads: 0 });
+        setBranchCounts(bc);
+        setSemCounts(sc);
       } catch { /* silent */ }
       setLoading(false);
     })();
   }, []);
 
   const cards = [
-    { label: "Total Users", value: stats.users, color: "bg-blue-50 text-blue-600", icon: Users },
-    { label: "Total Materials", value: stats.materials, color: "bg-indigo-50 text-indigo-600", icon: BookOpen },
-    { label: "Total Backlogs", value: stats.backlogs, color: "bg-amber-50 text-amber-600", icon: AlertCircle },
+    { label: "Total Users", value: stats.users, color: "blue", icon: Users },
+    { label: "Total Materials", value: stats.materials, color: "indigo", icon: BookOpen },
+    { label: "Downloads", value: stats.downloads, color: "emerald", icon: Download },
+    { label: "Total Backlogs", value: stats.backlogs, color: "amber", icon: AlertCircle },
   ];
+
+  if (loading) {
+    return <div className="admin-loading"><Loader2 style={{ width: 24, height: 24 }} /></div>;
+  }
+
+  const maxBranch = Math.max(...Object.values(branchCounts), 1);
+  const maxSem = Math.max(...Object.values(semCounts), 1);
 
   return (
     <div>
-      {loading ? (
-        <div className="flex items-center justify-center py-20 text-slate-400">
-          <Loader2 className="w-6 h-6 animate-spin" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-3 gap-5">
-          {cards.map(c => (
-            <div key={c.label} className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${c.color}`}>
-                <c.icon className="w-5 h-5" />
-              </div>
-              <p className="text-2xl font-bold text-slate-800">{c.value}</p>
-              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">{c.label}</p>
+      {/* Stat Cards */}
+      <div className="admin-stats-grid">
+        {cards.map(c => (
+          <div key={c.label} className={`admin-stat-card ${c.color}`}>
+            <div className={`admin-stat-icon ${c.color}`}>
+              <c.icon style={{ width: 20, height: 20 }} />
             </div>
-          ))}
+            <p className="admin-stat-value">{c.value}</p>
+            <p className="admin-stat-label">{c.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Charts */}
+      <div className="admin-charts-grid">
+        {/* Users per Branch */}
+        <div className="admin-chart-card">
+          <h3 className="admin-chart-title">Users by Branch</h3>
+          <div className="admin-bar-chart">
+            {BRANCHES.map((b, i) => {
+              const count = branchCounts[b] || 0;
+              const pct = Math.max((count / maxBranch) * 100, count > 0 ? 8 : 0);
+              const colors = ["blue", "indigo", "emerald", "amber"];
+              return (
+                <div key={b} className="admin-bar-row">
+                  <span className="admin-bar-label">{b}</span>
+                  <div className="admin-bar-track">
+                    <div className={`admin-bar-fill ${colors[i % 4]}`} style={{ width: `${pct}%` }}>
+                      {count}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      )}
+
+        {/* Materials per Semester */}
+        <div className="admin-chart-card">
+          <h3 className="admin-chart-title">Materials by Semester</h3>
+          <div className="admin-bar-chart">
+            {SEMESTERS.map((s, i) => {
+              const count = semCounts[s] || 0;
+              const pct = Math.max((count / maxSem) * 100, count > 0 ? 8 : 0);
+              const colors = ["blue", "indigo", "emerald", "amber"];
+              return (
+                <div key={s} className="admin-bar-row">
+                  <span className="admin-bar-label">{s}</span>
+                  <div className="admin-bar-track">
+                    <div className={`admin-bar-fill ${colors[i % 4]}`} style={{ width: `${pct}%` }}>
+                      {count}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -198,11 +262,13 @@ function DashboardTab() {
 // ═══════════════════════════════════════════════════════════════
 // PAGE 2: USERS
 // ═══════════════════════════════════════════════════════════════
-function UsersTab({ flash }: { flash: (m: string, ok?: boolean) => void }) {
+function UsersTab({ flash, globalSearch }: { flash: (m: string, ok?: boolean) => void; globalSearch: string }) {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterBranch, setFilterBranch] = useState("all");
+  const [filterSem, setFilterSem] = useState("all");
+  const [viewUser, setViewUser] = useState<any>(null);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -239,10 +305,11 @@ function UsersTab({ flash }: { flash: (m: string, ok?: boolean) => void }) {
     }
   };
 
+  const q = (search || globalSearch).toLowerCase();
   const filtered = users.filter(u => {
     if (filterBranch !== "all" && u.branch !== filterBranch) return false;
-    if (search) {
-      const q = search.toLowerCase();
+    if (filterSem !== "all" && normalizeSemester(u.semester) !== filterSem) return false;
+    if (q) {
       const name = (u.name || "").toLowerCase();
       const email = (u.email || u.id || "").toLowerCase();
       if (!name.includes(q) && !email.includes(q)) return false;
@@ -252,85 +319,103 @@ function UsersTab({ flash }: { flash: (m: string, ok?: boolean) => void }) {
 
   return (
     <div>
+      {/* User Detail Modal */}
+      {viewUser && (
+        <div className="admin-modal-backdrop" onClick={() => setViewUser(null)}>
+          <div className="admin-modal-card" onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h3 className="admin-modal-title" style={{ marginBottom: 0 }}>User Details</h3>
+              <button className="admin-action-btn" onClick={() => setViewUser(null)}><X style={{ width: 18, height: 18, color: "#94a3b8" }} /></button>
+            </div>
+            <div style={{ marginTop: 16 }}>
+              {[
+                ["Name", viewUser.name || "—"],
+                ["Email", viewUser.email || viewUser.id],
+                ["Branch", viewUser.branch || "—"],
+                ["Semester", normalizeSemester(viewUser.semester) || "—"],
+                ["College", viewUser.college || "—"],
+                ["Status", viewUser.disabled ? "Disabled" : "Active"],
+                ["Backlogs", viewUser.backlogs?.length || 0],
+                ["CGPA", viewUser.cgpa ?? "—"],
+              ].map(([k, v]) => (
+                <div className="admin-modal-row" key={k as string}>
+                  <span className="admin-modal-key">{k}</span>
+                  <span className="admin-modal-val">{String(v)}</span>
+                </div>
+              ))}
+            </div>
+            <button className="admin-modal-close" onClick={() => setViewUser(null)}>Close</button>
+          </div>
+        </div>
+      )}
+
       {/* Toolbar */}
-      <div className="flex items-center gap-3 mb-5">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      <div className="admin-toolbar">
+        <div className="admin-toolbar-search">
+          <Search />
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search name or email..."
-            className="w-full h-9 pl-9 pr-3 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
           />
         </div>
-        <select
-          value={filterBranch}
-          onChange={e => setFilterBranch(e.target.value)}
-          className="h-9 px-3 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 cursor-pointer focus:outline-none"
-        >
+        <select value={filterBranch} onChange={e => setFilterBranch(e.target.value)} className="admin-filter-select">
           <option value="all">All Branches</option>
           {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
         </select>
-        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider ml-auto">{filtered.length} users</span>
+        <select value={filterSem} onChange={e => setFilterSem(e.target.value)} className="admin-filter-select">
+          <option value="all">All Semesters</option>
+          {SEMESTERS.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <span className="admin-count-badge">{filtered.length} users</span>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="admin-table-wrap">
         {loading ? (
-          <div className="py-16 text-center text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
+          <div className="admin-loading"><Loader2 style={{ width: 24, height: 24 }} /></div>
         ) : filtered.length === 0 ? (
-          <div className="py-16 text-center text-slate-500 font-medium">No users found.</div>
+          <div className="admin-empty">No users found.</div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
+          <table>
+            <thead>
               <tr>
-                <th className={thClass}>Name</th>
-                <th className={thClass}>Email</th>
-                <th className={thClass}>Branch</th>
-                <th className={thClass}>Semester</th>
-                <th className={thClass}>Status</th>
-                <th className={thClass + " text-right"}>Actions</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Branch</th>
+                <th>Semester</th>
+                <th>Status</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {filtered.map(u => (
-                <tr key={u.id} className="hover:bg-slate-50/60 transition-colors group">
-                  <td className={tdClass}>
-                    <span className="font-bold text-slate-800">{u.name || "—"}</span>
+                <tr key={u.id}>
+                  <td><span style={{ fontWeight: 700, color: "#0f172a" }}>{u.name || "—"}</span></td>
+                  <td><span style={{ fontFamily: "monospace", fontSize: 12, color: "#64748b" }}>{u.email || u.id}</span></td>
+                  <td><span className="admin-badge branch">{u.branch || "—"}</span></td>
+                  <td>{normalizeSemester(u.semester) || "—"}</td>
+                  <td>
+                    {u.disabled
+                      ? <span className="admin-badge disabled">Disabled</span>
+                      : <span className="admin-badge active">Active</span>
+                    }
                   </td>
-                  <td className={tdClass}>
-                    <span className="text-slate-500 font-mono text-[12px]">{u.email || u.id}</span>
-                  </td>
-                  <td className={tdClass}>
-                    <span className="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 rounded">{u.branch || "—"}</span>
-                  </td>
-                  <td className={tdClass}>{normalizeSemester(u.semester) || "—"}</td>
-                  <td className={tdClass}>
-                    {u.disabled ? (
-                      <span className="text-red-600 bg-red-50 text-[11px] font-bold px-2 py-0.5 rounded border border-red-100">Disabled</span>
-                    ) : (
-                      <span className="text-emerald-700 bg-emerald-50 text-[11px] font-bold px-2 py-0.5 rounded border border-emerald-100">Active</span>
-                    )}
-                  </td>
-                  <td className={tdClass + " text-right"}>
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => handleToggle(u)}
-                        title={u.disabled ? "Enable user" : "Disable user"}
-                        className={`p-1.5 rounded-lg transition-colors ${
-                          u.disabled
-                            ? "text-emerald-500 hover:bg-emerald-50"
-                            : "text-amber-500 hover:bg-amber-50"
-                        }`}
-                      >
-                        {u.disabled ? <UserCheck className="w-4 h-4" /> : <UserX className="w-4 h-4" />}
+                  <td>
+                    <div className="admin-actions">
+                      <button className="admin-action-btn view" title="View" onClick={() => setViewUser(u)}>
+                        <Eye />
                       </button>
                       <button
-                        onClick={() => handleDelete(u)}
-                        className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        className={`admin-action-btn ${u.disabled ? "enable" : "disable"}`}
+                        title={u.disabled ? "Enable" : "Disable"}
+                        onClick={() => handleToggle(u)}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        {u.disabled ? <UserCheck /> : <UserX />}
+                      </button>
+                      <button className="admin-action-btn delete" title="Delete" onClick={() => handleDelete(u)}>
+                        <Trash2 />
                       </button>
                     </div>
                   </td>
@@ -345,14 +430,15 @@ function UsersTab({ flash }: { flash: (m: string, ok?: boolean) => void }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PAGE 3: MATERIALS
+// PAGE 3: MATERIALS (Expandable Hierarchy)
 // ═══════════════════════════════════════════════════════════════
-function MaterialsTab({ flash }: { flash: (m: string, ok?: boolean) => void }) {
+function MaterialsTab({ flash, globalSearch }: { flash: (m: string, ok?: boolean) => void; globalSearch: string }) {
   const [materials, setMaterials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterBranch, setFilterBranch] = useState("all");
   const [filterSem, setFilterSem] = useState("all");
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const fetchMaterials = async () => {
     setLoading(true);
@@ -380,89 +466,109 @@ function MaterialsTab({ flash }: { flash: (m: string, ok?: boolean) => void }) {
     }
   };
 
+  const q = (search || globalSearch).toLowerCase();
   const filtered = materials.filter(m => {
     if (filterBranch !== "all" && m.branch !== filterBranch) return false;
     if (filterSem !== "all" && m.semester !== filterSem) return false;
-    if (search) {
-      const q = search.toLowerCase();
+    if (q) {
       if (!(m.title || "").toLowerCase().includes(q) && !(m.subject || "").toLowerCase().includes(q)) return false;
     }
     return true;
   });
 
+  // Group: Branch → Semester → Subject → Files
+  const grouped = useMemo(() => {
+    const map: Record<string, Record<string, Record<string, any[]>>> = {};
+    filtered.forEach(m => {
+      const b = m.branch || "Other";
+      const s = normalizeSemester(m.semester) || "?";
+      const sub = m.subject || "General";
+      if (!map[b]) map[b] = {};
+      if (!map[b][s]) map[b][s] = {};
+      if (!map[b][s][sub]) map[b][s][sub] = [];
+      map[b][s][sub].push(m);
+    });
+    return map;
+  }, [filtered]);
+
+  const toggle = (key: string) => {
+    setExpanded(prev => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  };
+
   return (
     <div>
       {/* Toolbar */}
-      <div className="flex items-center gap-3 mb-5 flex-wrap">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search title or subject..."
-            className="w-full h-9 pl-9 pr-3 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-          />
+      <div className="admin-toolbar">
+        <div className="admin-toolbar-search">
+          <Search />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search title or subject..." />
         </div>
-        <select value={filterBranch} onChange={e => setFilterBranch(e.target.value)} className="h-9 px-3 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 cursor-pointer focus:outline-none">
+        <select value={filterBranch} onChange={e => setFilterBranch(e.target.value)} className="admin-filter-select">
           <option value="all">All Branches</option>
           {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
         </select>
-        <select value={filterSem} onChange={e => setFilterSem(e.target.value)} className="h-9 px-3 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 cursor-pointer focus:outline-none">
+        <select value={filterSem} onChange={e => setFilterSem(e.target.value)} className="admin-filter-select">
           <option value="all">All Semesters</option>
           {SEMESTERS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider ml-auto">{filtered.length} items</span>
+        <span className="admin-count-badge">{filtered.length} items</span>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="py-16 text-center text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
-        ) : filtered.length === 0 ? (
-          <div className="py-16 text-center text-slate-500 font-medium">No materials found.</div>
-        ) : (
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className={thClass}>Title</th>
-                <th className={thClass}>Subject</th>
-                <th className={thClass}>Branch</th>
-                <th className={thClass}>Semester</th>
-                <th className={thClass}>Type</th>
-                <th className={thClass + " text-right"}>Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.map(m => (
-                <tr key={m.id} className="hover:bg-slate-50/60 transition-colors group">
-                  <td className={tdClass}>
-                    <span className="font-bold text-slate-800">{m.title}</span>
-                  </td>
-                  <td className={tdClass}>
-                    <span className="text-slate-600 truncate block max-w-[200px]" title={m.subject}>{m.subject}</span>
-                  </td>
-                  <td className={tdClass}>
-                    <span className="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 rounded">{m.branch}</span>
-                  </td>
-                  <td className={tdClass}>{normalizeSemester(m.semester)}</td>
-                  <td className={tdClass}>
-                    <span className="text-[11px] font-semibold text-slate-500">{TYPES.find(t => t.id === m.unit)?.label || m.unit}</span>
-                  </td>
-                  <td className={tdClass + " text-right"}>
-                    <button
-                      onClick={() => handleDelete(m)}
-                      className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      {loading ? (
+        <div className="admin-loading"><Loader2 style={{ width: 24, height: 24 }} /></div>
+      ) : Object.keys(grouped).length === 0 ? (
+        <div className="admin-table-wrap"><div className="admin-empty">No materials found.</div></div>
+      ) : (
+        Object.entries(grouped).map(([branch, sems]) => (
+          <div key={branch} className="admin-hierarchy-group">
+            <button className="admin-hierarchy-header" onClick={() => toggle(branch)}>
+              <ChevronRight className={`admin-hierarchy-chevron ${expanded.has(branch) ? "open" : ""}`} />
+              <span className="admin-hierarchy-header-text">{branch}</span>
+              <span className="admin-hierarchy-count">
+                {Object.values(sems).reduce((t, subMap) => t + Object.values(subMap).reduce((s, arr) => s + arr.length, 0), 0)} files
+              </span>
+            </button>
+            {expanded.has(branch) && (
+              <div className="admin-hierarchy-items">
+                {Object.entries(sems).sort(([a],[b]) => a.localeCompare(b)).map(([sem, subjects]) => (
+                  <div key={sem}>
+                    <div style={{ padding: "8px 20px 4px 48px" }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: "#818cf8", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>
+                        Semester {sem}
+                      </span>
+                    </div>
+                    {Object.entries(subjects).map(([subject, files]) => (
+                      <div key={subject}>
+                        <div style={{ padding: "6px 20px 2px 64px" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>{subject}</span>
+                          <span style={{ fontSize: 10, color: "#94a3b8", marginLeft: 8 }}>({files.length})</span>
+                        </div>
+                        {files.map((m: any) => (
+                          <div key={m.id} className="admin-hierarchy-item" style={{ paddingLeft: 80 }}>
+                            <div>
+                              <span className="admin-hierarchy-item-name">{m.title}</span>
+                              <span className="admin-hierarchy-item-meta" style={{ marginLeft: 10 }}>
+                                {TYPES.find(t => t.id === m.unit)?.label || m.unit}
+                              </span>
+                            </div>
+                            <button className="admin-action-btn delete" onClick={() => handleDelete(m)}>
+                              <Trash2 />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 }
@@ -526,7 +632,7 @@ function UploadTab({ flash }: { flash: (m: string, ok?: boolean) => void }) {
             unit: type, fileURL: url, fileName: file.name,
             createdAt: serverTimestamp(),
           });
-          flash(`"${title.trim()}" uploaded`);
+          flash(`"${title.trim()}" uploaded successfully`);
           setTitle("");
           setFile(null);
           if (fileRef.current) fileRef.current.value = "";
@@ -552,51 +658,46 @@ function UploadTab({ flash }: { flash: (m: string, ok?: boolean) => void }) {
   };
 
   return (
-    <div className="max-w-xl">
-      <form onSubmit={handleUpload} className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
-
+    <div>
+      <form onSubmit={handleUpload} className="admin-upload-card">
         {/* Branch + Semester */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="admin-upload-grid" style={{ marginBottom: 18 }}>
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Branch</label>
-            <select value={branch} onChange={e => setBranch(e.target.value)} className={selectClass}>
+            <label className="admin-field-label">Branch</label>
+            <select value={branch} onChange={e => setBranch(e.target.value)} className="admin-input" style={{ cursor: "pointer" }}>
               {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Semester</label>
-            <select value={semester} onChange={e => setSemester(e.target.value)} className={selectClass}>
+            <label className="admin-field-label">Semester</label>
+            <select value={semester} onChange={e => setSemester(e.target.value)} className="admin-input" style={{ cursor: "pointer" }}>
               {SEMESTERS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
         </div>
 
         {/* Subject */}
-        <div>
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Subject</label>
+        <div className="admin-field">
+          <label className="admin-field-label">Subject</label>
           {subjects.length === 0 ? (
-            <div className="h-10 px-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center text-sm font-medium text-amber-700">
-              No subjects for {branch} {semester}
-            </div>
+            <div className="admin-alert-warn">No subjects for {branch} {semester}</div>
           ) : (
-            <select value={subject} onChange={e => setSubject(e.target.value)} className={selectClass}>
+            <select value={subject} onChange={e => setSubject(e.target.value)} className="admin-input" style={{ cursor: "pointer" }}>
               {subjects.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           )}
         </div>
 
         {/* Type */}
-        <div>
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Type</label>
-          <div className="flex flex-wrap gap-1.5">
+        <div className="admin-field">
+          <label className="admin-field-label">Type</label>
+          <div className="admin-type-pills">
             {TYPES.map(t => (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => setType(t.id)}
-                className={`px-3 py-1.5 rounded-md text-[12px] font-bold transition-all ${
-                  type === t.id ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
+                className={`admin-type-pill ${type === t.id ? "active" : ""}`}
               >
                 {t.label}
               </button>
@@ -605,8 +706,8 @@ function UploadTab({ flash }: { flash: (m: string, ok?: boolean) => void }) {
         </div>
 
         {/* Title */}
-        <div>
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Title</label>
+        <div className="admin-field">
+          <label className="admin-field-label">Title</label>
           <input
             ref={titleRef}
             type="text"
@@ -615,34 +716,32 @@ function UploadTab({ flash }: { flash: (m: string, ok?: boolean) => void }) {
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder="e.g. Unit 1 Complete Notes"
-            className={inputClass + " h-11 text-[15px] font-semibold"}
+            className="admin-input"
+            style={{ height: 46, fontSize: 15 }}
           />
         </div>
 
         {/* File */}
-        <div>
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">File</label>
-          <div className={`relative border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer transition-all ${
-            file ? "border-emerald-300 bg-emerald-50/40 py-3" : "border-slate-300 bg-slate-50 hover:bg-slate-100 py-5"
-          }`}>
-            <input ref={fileRef} type="file" required onChange={e => setFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-            <div className="flex items-center gap-2.5 pointer-events-none">
-              <FileUp className={`w-5 h-5 ${file ? "text-emerald-600" : "text-slate-400"}`} />
-              <span className={`text-sm font-bold ${file ? "text-emerald-800" : "text-slate-500"}`}>
-                {file ? file.name : "Click to attach file"}
-              </span>
-            </div>
+        <div className="admin-field">
+          <label className="admin-field-label">File</label>
+          <div className={`admin-dropzone ${file ? "has-file" : ""}`}>
+            <input ref={fileRef} type="file" required onChange={e => setFile(e.target.files?.[0] || null)} />
+            <FileUp style={{ width: 20, height: 20, color: file ? "#10b981" : "#94a3b8" }} />
+            <span className="admin-dropzone-text" style={{ color: file ? "#065f46" : "#64748b" }}>
+              {file ? file.name : "Click to attach file"}
+            </span>
           </div>
         </div>
 
         {/* Progress */}
         {uploading && (
-          <div>
-            <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-              <span>Uploading</span><span>{progress}%</span>
+          <div className="admin-field">
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <span className="admin-field-label" style={{ marginBottom: 0 }}>Uploading</span>
+              <span className="admin-field-label" style={{ marginBottom: 0 }}>{progress}%</span>
             </div>
-            <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-              <div className="h-full bg-indigo-500 transition-all duration-300 rounded-full" style={{ width: `${progress}%` }} />
+            <div className="admin-progress-bar">
+              <div className="admin-progress-fill" style={{ width: `${progress}%` }} />
             </div>
           </div>
         )}
@@ -651,29 +750,27 @@ function UploadTab({ flash }: { flash: (m: string, ok?: boolean) => void }) {
         <button
           type="submit"
           disabled={uploading || !file || !title.trim() || !subject}
-          className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white text-[14px] font-bold rounded-xl shadow-sm transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="admin-submit-btn"
         >
-          {uploading ? <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</> : "Upload Material"}
+          {uploading ? <><Loader2 style={{ width: 16, height: 16, animation: "spin 1s linear infinite" }} /> Uploading...</> : "Upload Material"}
         </button>
       </form>
 
       {/* Recent uploads */}
       {recents.length > 0 && (
-        <div className="mt-8">
-          <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">Recent Uploads</h3>
-          <div className="space-y-1.5">
-            {recents.map((m: any) => (
-              <div key={m.id} className="bg-white rounded-lg border border-slate-200 px-3.5 py-2.5 flex items-center justify-between group hover:border-slate-300 transition-colors">
-                <div className="min-w-0">
-                  <p className="text-[13px] font-bold text-slate-800 truncate">{m.title}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{m.subject} · {m.branch} {normalizeSemester(m.semester)}</p>
-                </div>
-                <button onClick={() => handleDeleteRecent(m.id)} className="p-1 rounded text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all shrink-0">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+        <div className="admin-recents">
+          <h3 className="admin-recents-title">Recent Uploads</h3>
+          {recents.map((m: any) => (
+            <div key={m.id} className="admin-recent-item">
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <p className="admin-recent-item-title">{m.title}</p>
+                <p className="admin-recent-item-meta">{m.subject} · {m.branch} {normalizeSemester(m.semester)}</p>
               </div>
-            ))}
-          </div>
+              <button className="admin-action-btn delete" onClick={() => handleDeleteRecent(m.id)} style={{ opacity: 1, flexShrink: 0 }}>
+                <Trash2 />
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>
