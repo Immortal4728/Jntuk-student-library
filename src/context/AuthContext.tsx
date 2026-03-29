@@ -11,8 +11,9 @@ import {
   User,
   signOut as firebaseSignOut,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
+import { normalizeSemester } from "../lib/utils";
 
 // ─── User Profile Type ───
 export interface UserProfile {
@@ -21,6 +22,10 @@ export interface UserProfile {
   branch: string;
   semester: string;
   photoURL: string;
+  backlogs?: string[];
+  backlogSemester?: string;
+  cgpa?: number;
+  percentage?: number;
 }
 
 interface AuthContextType {
@@ -37,8 +42,12 @@ const defaultProfile: UserProfile = {
   name: "",
   college: "",
   branch: "CSE",
-  semester: "S6",
+  semester: "3-2",
   photoURL: "",
+  backlogs: [],
+  backlogSemester: "",
+  cgpa: undefined,
+  percentage: undefined,
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -69,12 +78,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (docSnap.exists()) {
         // Document exists → load it
         const data = docSnap.data() as Partial<UserProfile>;
+        const normalizedSem = normalizeSemester(data.semester || "3-2");
+
+        // Silent migration: fix legacy semester in Firestore
+        if (data.semester && data.semester !== normalizedSem) {
+          await setDoc(userDocRef, { semester: normalizedSem }, { merge: true });
+        }
+
         setProfile({
           name: data.name || currentUser.displayName || currentUser.email?.split("@")[0] || "",
           college: data.college || "",
           branch: data.branch || "CSE",
-          semester: data.semester || "S6",
+          semester: normalizedSem,
           photoURL: data.photoURL || currentUser.photoURL || "",
+          backlogs: data.backlogs || [],
+          backlogSemester: data.backlogSemester || "",
+          cgpa: data.cgpa,
+          percentage: data.percentage,
         });
       } else {
         // First login → auto-create doc
@@ -82,8 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: currentUser.displayName || currentUser.email?.split("@")[0] || "",
           college: "",
           branch: "CSE",
-          semester: "S6",
+          semester: "3-2",
           photoURL: currentUser.photoURL || "",
+          backlogs: [],
+          backlogSemester: "",
         };
         await setDoc(userDocRef, {
           uid: currentUser.uid,
@@ -99,8 +121,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: currentUser.displayName || currentUser.email?.split("@")[0] || "",
         college: "",
         branch: "CSE",
-        semester: "S6",
+        semester: "3-2",
         photoURL: currentUser.photoURL || "",
+        backlogs: [],
+        backlogSemester: "",
       });
     } finally {
       setProfileLoading(false);
@@ -122,24 +146,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, [loadProfile]);
 
-  const isAdmin = user?.email === "admin@email.com";
+  const isAdmin = user?.email === "rishichowdary2099@gmail.com";
 
   // ─── Persist profile updates to Firestore ───
   const updateProfile = useCallback(
     async (updates: Partial<UserProfile>) => {
+      // Sanitize semester before saving
+      if (updates.semester) {
+        updates.semester = normalizeSemester(updates.semester);
+      }
+
       // Optimistic UI update
       setProfile((prev) => ({ ...prev, ...updates }));
 
       if (user) {
         try {
           const userDocRef = doc(db, "users", user.uid);
-          await updateDoc(userDocRef, {
+          await setDoc(userDocRef, {
             ...updates,
+            email: user.email,
             updatedAt: new Date().toISOString(),
-          });
+          }, { merge: true });
         } catch (error) {
           console.error("Failed to save profile to Firestore:", error);
-          // Rollback could be added here if needed
+          throw error;
         }
       }
     },
