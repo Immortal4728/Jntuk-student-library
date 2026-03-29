@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform, useSpring, useMotionValue, animate } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
+import SEO from '../components/SEO';
 import {
   FileText,
   BookOpen,
@@ -140,6 +141,11 @@ export default function HomePage() {
 
   return (
     <div className="relative overflow-hidden bg-[#fafafa]">
+      <SEO
+        title="JNTUK Materials | All Semesters Notes & PYQs"
+        description="Access JNTUK semester-wise materials, PYQs, notes, and important questions for CSE, ECE, IT, AIML students. R23 Regulation. Free download."
+        canonicalUrl="/"
+      />
       {/* ═══════════════════════════════════════════
           HERO SECTION — 100vh Full Viewport
       ═══════════════════════════════════════════ */}

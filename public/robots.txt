@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Block admin/dashboard routes from indexing
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /login
+Disallow: /control-center
+
+Sitemap: https://jntuk-student-library.vercel.app/sitemap.xml

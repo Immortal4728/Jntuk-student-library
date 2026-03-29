@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { BookOpen, FileText, HelpCircle, Zap, Layout, Shield, RefreshCw } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const stagger = {
   hidden: { opacity: 0 },
@@ -68,6 +69,12 @@ const PRINCIPLES = [
 export default function AboutPage() {
   return (
     <div className="bg-[#f8fafc] min-h-[calc(100vh-4rem)] relative overflow-hidden">
+      <SEO
+        title="About JNTUK Library - Student Materials Platform"
+        description="Learn about JNTUK Library — a centralized platform for JNTUK students to access semester-wise materials, notes, PYQs, and important questions. Built by Rishi Chowdary."
+        keywords="about JNTUK library, JNTUK student platform, JNTU Kakinada materials platform, engineering study resources"
+        canonicalUrl="/about"
+      />
       {/* Subtle Grid Background */}
       <div
         className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none"

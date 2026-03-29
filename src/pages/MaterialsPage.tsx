@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Monitor, Cpu, Terminal, Bot, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SEO from '../components/SEO';
 
 const branches = [
   {
@@ -41,6 +42,12 @@ const branches = [
 export default function MaterialsPage() {
   return (
     <div className="bg-[#f8fafc] min-h-[calc(100vh-4rem)]">
+      <SEO
+        title="JNTUK Materials - Semester Wise Resources"
+        description="Browse JNTUK semester-wise study materials by branch — CSE, ECE, IT, AIML. Download notes, PYQs, and important questions for R23 regulation."
+        keywords="JNTUK materials, CSE materials, ECE materials, IT materials, AIML materials, JNTUK branch wise notes, R23 regulation materials"
+        canonicalUrl="/materials"
+      />
       <div className="max-w-3xl mx-auto px-5 pt-12 pb-24 md:pt-16 md:pb-28">
 
         {/* Header Section */}

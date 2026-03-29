@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ChevronRight, FileText, ArrowLeft, ChevronDown, BookOpen, FileQuestion, ScrollText, AlertCircle } from 'lucide-react';
 import { getDisplaySemester } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import SEO from '../components/SEO';
 
 const unitTypes = [
   { id: 'unit-1', label: 'Unit 1', icon: BookOpen },
@@ -85,6 +86,12 @@ export default function SubjectsPage() {
 
   return (
     <div className="bg-[#f8fafc] min-h-[calc(100vh-4rem)] selection:bg-slate-900 selection:text-white relative">
+      <SEO
+        title={`JNTUK ${branchName} ${currentSemLabel} Materials | Notes, PYQs`}
+        description={`Download JNTUK ${branchName} ${currentSemLabel} semester materials — unit-wise notes, previous papers, and important questions. R23 Regulation.`}
+        keywords={`JNTUK ${branchName} ${currentSemLabel}, ${branchName} ${currentSemLabel} notes, ${branchName} ${currentSemLabel} PYQs, JNTUK ${currentSemLabel} semester materials, R23 ${branchName}`}
+        canonicalUrl={`/materials/${branch}/semester/${semesterNumber}`}
+      />
       <motion.div 
         initial={{ opacity: 0, scale: 0.98, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
