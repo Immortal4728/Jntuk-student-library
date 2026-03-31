@@ -57,8 +57,8 @@ export default function DashboardPage() {
           <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white mb-1.5 flex items-center gap-2">
             {greeting}, {firstName} <span className="text-xl">👋</span>
           </h1>
-          <div 
-            className="text-sm font-medium flex items-center gap-2 group cursor-pointer w-fit" 
+          <div
+            className="text-sm font-medium flex items-center gap-2 group cursor-pointer w-fit"
             onClick={() => userBacklogs.length > 0 && navigate("/dashboard/tracker")}
           >
             {userBacklogs.length > 0 ? (
@@ -110,7 +110,7 @@ export default function DashboardPage() {
               </span>
               Focus Now
             </div>
-            
+
             <div className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold font-mono">
               PRIORITY
             </div>
@@ -145,23 +145,21 @@ export default function DashboardPage() {
 
         {/* Backlogs Card */}
         <div
-          className={`backdrop-blur-md rounded-[1.25rem] shadow-[0_4px_20px_rgb(0,0,0,0.1)] p-5 hover:scale-[1.03] transition-all duration-300 active:scale-95 group relative overflow-hidden flex flex-col justify-between border ${
-            userBacklogs.length > 0
+          className={`backdrop-blur-md rounded-[1.25rem] shadow-[0_4px_20px_rgb(0,0,0,0.1)] p-5 hover:scale-[1.03] transition-all duration-300 active:scale-95 group relative overflow-hidden flex flex-col justify-between border ${userBacklogs.length > 0
               ? "bg-red-50/95 border-red-200/50"
               : "bg-white/95 border-slate-700/20"
-          }`}
+            }`}
         >
           {userBacklogs.length > 0 && (
             <div className="absolute inset-0 bg-red-500/5 pointer-events-none" />
           )}
           <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/10 rounded-full blur-2xl -mr-8 -mt-8 transition-transform group-hover:scale-150" />
-          
+
           <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 relative z-10 ${
-              userBacklogs.length > 0
+            className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 relative z-10 ${userBacklogs.length > 0
                 ? "bg-red-100 text-red-600"
                 : "bg-emerald-50 text-emerald-600"
-            }`}
+              }`}
           >
             {userBacklogs.length > 0 ? (
               <AlertCircle className="w-5 h-5 group-hover:animate-bounce" />

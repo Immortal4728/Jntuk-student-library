@@ -36,7 +36,7 @@ export default function Footer() {
       ]}
 
       creatorName="Rishi Chowdary"
-      creatorUrl="https://github.com"
+      creatorUrl="https://github.com/Immortal4728"
       brandIcon={
         <BookOpen className="w-8 sm:w-10 md:w-14 h-8 sm:h-10 md:h-14 text-white drop-shadow-lg" />
       }

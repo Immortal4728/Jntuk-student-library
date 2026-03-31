@@ -39,6 +39,7 @@ import {
   ALL_SEMESTER_IDS,
   createEmptySemester,
   createDefaultSubject,
+  formatGpa,
 } from "../lib/academicUtils";
 
 // ─── Tab Definitions ───
@@ -57,12 +58,14 @@ function CircularProgress({
   label,
   color = "#6366f1",
   size = 120,
+  displayDecimals = 2,
 }: {
   value: number;
   max: number;
   label: string;
   color?: string;
   size?: number;
+  displayDecimals?: number;
 }) {
   const radius = (size - 12) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -96,7 +99,7 @@ function CircularProgress({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-black text-slate-900 tracking-tight">
-            {value || "—"}
+            {Number.isFinite(value) ? value.toFixed(displayDecimals) : "—"}
           </span>
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
             / {max}
@@ -367,7 +370,9 @@ export default function AcademicTrackerPage() {
                         {sem.semId} Semester
                       </h3>
                       <div className="flex items-center gap-3 mt-0.5">
-                        <span className="text-xs font-semibold text-indigo-600">{sgpa} SGPA</span>
+                        <span className="text-xs font-semibold text-indigo-600">
+                          {formatGpa(sgpa)} SGPA
+                        </span>
                         <span className="text-[10px] text-slate-400">•</span>
                         <span className="text-xs text-slate-500">{pct}%</span>
                         {backs > 0 && (
@@ -471,11 +476,12 @@ export default function AcademicTrackerPage() {
                 size={120}
               />
               <CircularProgress
-                value={parseFloat(percentage.toFixed(1))}
+                value={percentage}
                 max={100}
                 label="Percentage"
                 color="#8b5cf6"
                 size={120}
+                displayDecimals={1}
               />
             </div>
           </div>
@@ -531,7 +537,7 @@ export default function AcademicTrackerPage() {
                 <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center mx-auto mb-2">
                   <Zap className="w-5 h-5 text-indigo-600" />
                 </div>
-                <p className="text-lg font-black text-slate-900">{cgpa}</p>
+                <p className="text-lg font-black text-slate-900">{formatGpa(cgpa)}</p>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                   Max CGPA
                 </p>
@@ -580,7 +586,7 @@ export default function AcademicTrackerPage() {
                       />
                     </div>
                     <span className="text-xs font-black text-slate-700 w-10 text-right">
-                      {sgpa}
+                      {formatGpa(sgpa)}
                     </span>
                   </div>
                 );
@@ -676,7 +682,9 @@ export default function AcademicTrackerPage() {
                       Semester {activeSemTab} SGPA
                     </p>
                     <p className="text-3xl font-black text-indigo-700 tracking-tight">
-                      {calcSGPA(activeSem.subjects) || "—"}
+                      {activeSem.subjects.length === 0
+                        ? "—"
+                        : formatGpa(calcSGPA(activeSem.subjects))}
                     </p>
                   </div>
                   <div className="text-right">
@@ -684,7 +692,7 @@ export default function AcademicTrackerPage() {
                       Overall CGPA
                     </p>
                     <p className="text-3xl font-black text-violet-700 tracking-tight">
-                      {cgpa || "—"}
+                      {semesters.length === 0 ? "—" : formatGpa(cgpa)}
                     </p>
                   </div>
                 </div>
@@ -778,15 +786,20 @@ export default function AcademicTrackerPage() {
                               </label>
                               <input
                                 type="number"
+                                step="0.1"
                                 value={sub.credits}
-                                onChange={(e) =>
+                                onChange={(e) => {
+                                  const raw = Number(e.target.value);
+                                  const credit = Number.isFinite(raw)
+                                    ? Math.max(0, raw)
+                                    : 0;
                                   updateSubject(
                                     activeSemTab,
                                     sub.id,
                                     "credits",
-                                    Math.max(0, parseInt(e.target.value) || 0)
-                                  )
-                                }
+                                    credit
+                                  );
+                                }}
                                 min={0}
                                 max={10}
                                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-center text-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"

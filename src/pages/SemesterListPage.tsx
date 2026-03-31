@@ -75,8 +75,8 @@ const years = [
     borderActive: 'border-rose-200/60',
     shadow: 'shadow-[0_8px_30px_rgba(244,63,94,0.06)]',
     semesters: [
-      { number: '4-1', label: '4-1' },
-      { number: '4-2', label: '4-2' },
+      { number: '4-1', label: '4-1', comingSoon: true },
+      { number: '4-2', label: '4-2', comingSoon: true },
     ],
   },
 ];
@@ -227,20 +227,34 @@ export default function SemesterListPage() {
                             Select Semester
                           </p>
                           <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                            {year.semesters.map((sem) => (
+                            {year.semesters.map((sem) => {
+                              const isSoon = 'comingSoon' in sem && sem.comingSoon;
+                              return (
                               <Link
                                 key={sem.number}
                                 to={`/materials/${branch}/semester/${sem.number}`}
-                                className="group relative flex flex-col items-center justify-center h-16 rounded-xl bg-gradient-to-b from-white to-slate-50/50 border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md active:scale-[0.97] active:shadow-none transition-all duration-200 overflow-hidden"
+                                className={`group relative flex flex-col items-center justify-center rounded-xl border shadow-sm active:scale-[0.97] active:shadow-none transition-all duration-200 overflow-hidden ${
+                                  isSoon
+                                    ? 'h-[4.5rem] bg-gradient-to-b from-amber-50/60 to-white border-amber-200/60 hover:border-amber-300'
+                                    : 'h-16 bg-gradient-to-b from-white to-slate-50/50 border-slate-200 hover:border-slate-300 hover:shadow-md'
+                                }`}
                               >
                                 {/* Hover Glow / Selection Flash */}
                                 <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/[0.02] group-active:bg-slate-900/[0.04] transition-colors duration-200" />
                                 
-                                <span className="relative z-10 text-[1.125rem] font-bold text-slate-600 group-hover:text-slate-900 tracking-tight transition-colors duration-200">
+                                <span className={`relative z-10 text-[1.125rem] font-bold tracking-tight transition-colors duration-200 ${
+                                  isSoon ? 'text-slate-500 group-hover:text-slate-700' : 'text-slate-600 group-hover:text-slate-900'
+                                }`}>
                                   {sem.label}
                                 </span>
+                                {isSoon && (
+                                  <span className="relative z-10 mt-1 px-2 py-0.5 rounded-full bg-amber-100 text-[9px] font-bold text-amber-700 tracking-[0.08em] uppercase">
+                                    Coming Soon
+                                  </span>
+                                )}
                               </Link>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       )}

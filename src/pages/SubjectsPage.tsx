@@ -1,70 +1,22 @@
 import { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { ChevronRight, FileText, ArrowLeft, ChevronDown, BookOpen, FileQuestion, ScrollText, AlertCircle } from 'lucide-react';
+import { ChevronRight, FileText, ArrowLeft, ChevronDown, FolderArchive, FileArchive, AlertCircle, Clock, Construction } from 'lucide-react';
 import { getDisplaySemester } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../components/SEO';
-
-const unitTypes = [
-  { id: 'unit-1', label: 'Unit 1', icon: BookOpen },
-  { id: 'unit-2', label: 'Unit 2', icon: BookOpen },
-  { id: 'unit-3', label: 'Unit 3', icon: BookOpen },
-  { id: 'unit-4', label: 'Unit 4', icon: BookOpen },
-  { id: 'unit-5', label: 'Unit 5', icon: BookOpen },
-];
+import { materials } from '../data/materials';
+import { downloadFile } from '../lib/downloadFile';
 
 const resourceTypes = [
-  { id: 'important-qs', label: 'Important Questions', icon: FileQuestion },
-  { id: 'prev-papers', label: 'Previous Papers', icon: ScrollText },
+  {
+    id: 'study-material-zip',
+    label: 'Study Material (ZIP)',
+    icon: FolderArchive,
+    description: 'Includes all 5 units combined in one downloadable file',
+  },
+  { id: 'important-qs', label: 'Important Questions', icon: FileText },
+  { id: 'prev-papers', label: 'Previous Papers', icon: FileArchive },
 ];
-
-const subjectsData: Record<string, Record<string, string[]>> = {
-  CSE: {
-    "2-1": ["Universal Human Values", "Discrete Mathematics", "Digital Logic", "Data Structures", "OOPs with Java"],
-    "2-2": ["MEFA", "Probability & Statistics", "DBMS", "Operating Systems", "Software Engineering"],
-    "3-1": ["Data Warehousing", "Formal Languages", "Computer Networks", "Artificial Intelligence", "EDVC"],
-    "3-2": ["Compiler Design", "Cloud Computing", "Network Security", "Machine Learning", "Software Project Mgmt", "MPMC"]
-  },
-  IT: {
-    "2-1": ["Discrete Mathematics", "Universal Human Values", "Digital Logic", "Data Structures", "Java"],
-    "2-2": ["Optimization", "Probability & Statistics", "Operating Systems", "DBMS", "Software Engineering"],
-    "3-1": ["Advanced Java", "Computer Networks", "Compiler Design", "Data Warehousing", "Electronics"],
-    "3-2": ["Machine Learning", "Software Methodology", "Software Project Mgmt", "Network Security", "Cloud Computing", "MPMC"]
-  },
-  ECE: {
-    "2-1": ["Probability & Stochastic", "Universal Human Values", "Signals & Systems", "Electronic Devices", "Logic Design"],
-    "2-2": ["MEFA", "Control Systems", "Electromagnetic Waves", "Circuit Analysis", "Analog Communication"],
-    "3-1": ["IC Applications", "Digital Communications", "Antennas & Propagation", "Measurements", "Computer Architecture"],
-    "3-2": ["VLSI Design", "Digital Signal Processing", "Machine Learning", "Microcontrollers", "Embedded Systems", "DBMS"]
-  },
-  AIML: {
-  }
-};
-
-const commonFirstYear: Record<string, string[]> = {
-  "1-1": [
-    "Communicative English",
-    "Engineering Chemistry",
-    "Linear Algebra & Calculus",
-    "Basic Civil & Mechanical Engineering",
-    "Introduction to Programming (C)"
-  ],
-  "1-2": [
-    "Engineering Physics",
-    "Differential Equations & Vector Calculus",
-    "Basic Electrical and Engineering",
-    "Engineering Graphics",
-    "Data Structures"
-  ]
-};
-
-const getSubjects = (branch: string, semester: string): string[] => {
-  const year = semester.split("-")[0];
-  if (year === "1") {
-    return commonFirstYear[semester] || [];
-  }
-  return subjectsData[branch]?.[semester] || [];
-};
 
 export default function SubjectsPage() {
   const { branch, semesterNumber } = useParams<{ branch: string; semesterNumber: string }>();
@@ -74,15 +26,17 @@ export default function SubjectsPage() {
   const currentSemLabel = getDisplaySemester(semesterNumber || '1-1');
 
   const branchName = branch?.toUpperCase() || 'CSE';
-  const retrievedSubjects = getSubjects(branchName, currentSemLabel);
+  const subjectsForSemester = (materials as any)?.[currentSemLabel] as Record<string, string> | undefined;
+  const comingSoon = !subjectsForSemester || Object.keys(subjectsForSemester).length === 0;
 
-  const mappedSubjects = retrievedSubjects.map(name => ({
-    id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-    name,
-    code: null
+  const mappedSubjects = Object.keys(subjectsForSemester || {}).map((subjectKey) => ({
+    id: subjectKey,
+    name: subjectKey,
+    materialKey: subjectKey,
+    code: null,
   }));
 
-  const totalResourcesPerSubject = unitTypes.length + resourceTypes.length;
+  const totalResourcesPerSubject = resourceTypes.length;
 
   return (
     <div className="bg-[#f8fafc] min-h-[calc(100vh-4rem)] selection:bg-slate-900 selection:text-white relative">
@@ -137,7 +91,50 @@ export default function SubjectsPage() {
 
         {/* Subject Accordion List */}
         <div className="flex flex-col gap-4 relative">
-          {mappedSubjects.length === 0 ? (
+          {comingSoon ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="py-16 sm:py-24 flex flex-col items-center justify-center text-center"
+            >
+              {/* Icon */}
+              <div className="relative mb-6">
+                <div className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/60 shadow-[0_8px_30px_rgba(245,158,11,0.1)] flex items-center justify-center">
+                  <Construction size={34} className="text-amber-500" strokeWidth={1.5} />
+                </div>
+                <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-amber-100 border-2 border-white flex items-center justify-center shadow-sm">
+                  <Clock size={12} className="text-amber-600" strokeWidth={2.5} />
+                </div>
+              </div>
+
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200/60 mb-5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+                </span>
+                <span className="text-[11px] font-bold text-amber-700 tracking-[0.1em] uppercase">Coming Soon</span>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-[1.5rem] sm:text-[1.75rem] font-bold text-slate-900 tracking-tight mb-3">
+                {currentSemLabel} Semester Materials
+              </h3>
+              <p className="text-[0.9375rem] font-medium text-slate-500 max-w-sm leading-relaxed mb-8">
+                We're preparing content for this semester. Materials will be available here once they're ready.
+              </p>
+
+              {/* Back button */}
+              <button
+                onClick={() => navigate(-1)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-[14px] font-semibold shadow-[0_2px_12px_rgba(15,23,42,0.2)] hover:shadow-[0_6px_20px_rgba(15,23,42,0.25)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300"
+              >
+                <ArrowLeft size={16} strokeWidth={2.5} />
+                Go Back
+              </button>
+            </motion.div>
+          ) : mappedSubjects.length === 0 ? (
             <div className="py-20 flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 rounded-[1.25rem] bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-5">
                 <AlertCircle size={28} className="text-slate-400" />
@@ -233,53 +230,54 @@ export default function SubjectsPage() {
                          <div className="px-5 pb-6 pt-1 sm:px-6">
                            <div className="flex flex-col gap-7 pt-3 border-t border-slate-100/80 mt-1">
                              
-                             {/* UNITS Flow Layout */}
-                             <div>
-                               <h4 className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase mb-2 pl-2">Units</h4>
-                               <div className="flex flex-col">
-                                 {unitTypes.map((type, idx) => (
-                                   <Link
-                                     key={type.id}
-                                     to={`/materials/${branch}/semester/${semesterNumber}/${subject.id}?view=${type.id}`}
-                                     className={`group flex items-center justify-between p-3.5 -mx-2 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-colors duration-200 ${
-                                       idx !== unitTypes.length - 1 ? 'border-b border-slate-50/80' : ''
-                                     }`}
-                                   >
-                                     <div className="flex items-center gap-3.5">
-                                       <type.icon size={18} strokeWidth={2.25} className="text-slate-400 group-hover:text-indigo-500 transition-colors" />
-                                       <span className="text-[0.9375rem] font-medium text-slate-600 group-hover:text-slate-900 transition-colors">
-                                         {type.label}
-                                       </span>
-                                     </div>
-                                     <ChevronRight size={16} strokeWidth={2.5} className="text-slate-300 group-hover:text-indigo-500 transition-all duration-300 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
-                                   </Link>
-                                 ))}
-                               </div>
-                             </div>
-
                              {/* RESOURCES Flow Layout */}
                              <div>
                                <h4 className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase mb-2 pl-2">Resources</h4>
                                <div className="flex flex-col">
                                  {resourceTypes.map((type, idx) => (
-                                   <Link
-                                     key={type.id}
-                                     to={`/materials/${branch}/semester/${semesterNumber}/${subject.id}?view=${type.id}`}
-                                     className={`group flex items-center justify-between p-3.5 -mx-2 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-colors duration-200 ${
-                                       idx !== resourceTypes.length - 1 ? 'border-b border-slate-50/80' : ''
-                                     }`}
-                                   >
-                                     <div className="flex items-center gap-3.5">
-                                       <type.icon size={18} strokeWidth={2.25} className="text-slate-400 group-hover:text-emerald-500 transition-colors" />
-                                       <span className="text-[0.9375rem] font-medium text-slate-600 group-hover:text-slate-900 transition-colors">
-                                         {type.label}
-                                       </span>
-                                     </div>
-                                     <ChevronRight size={16} strokeWidth={2.5} className="text-slate-300 group-hover:text-emerald-500 transition-all duration-300 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
-                                   </Link>
-                                 ))}
-                               </div>
-                             </div>
+                                  type.id === 'study-material-zip' ? (
+                                    <button
+                                      key={type.id}
+                                      type="button"
+                                      onClick={() => downloadFile((subjectsForSemester as any)?.[subject.materialKey])}
+                                      aria-label={`Download ${type.label}`}
+                                      className={`group flex items-center justify-between p-3.5 -mx-2 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-colors duration-200 ${
+                                        idx !== resourceTypes.length - 1 ? 'border-b border-slate-50/80' : ''
+                                      }`}
+                                    >
+                                      <div className="flex items-center gap-3.5 min-w-0">
+                                        <type.icon size={18} strokeWidth={2.25} className="text-slate-400 group-hover:text-emerald-500 transition-colors flex-shrink-0" />
+                                        <div className="min-w-0">
+                                          <span className="block text-[0.9375rem] font-medium text-slate-600 group-hover:text-slate-900 transition-colors">
+                                            {type.label}
+                                          </span>
+                                          <p className="text-[0.75rem] leading-5 text-slate-500 mt-0.5">
+                                            {type.description}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <ChevronRight size={16} strokeWidth={2.5} className="text-slate-300 group-hover:text-emerald-500 transition-all duration-300 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 flex-shrink-0" />
+                                    </button>
+                                  ) : (
+                                    <Link
+                                      key={type.id}
+                                      to={`/materials/${branch}/semester/${semesterNumber}/${subject.id}?view=${type.id}`}
+                                      className={`group flex items-center justify-between p-3.5 -mx-2 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-colors duration-200 ${
+                                        idx !== resourceTypes.length - 1 ? 'border-b border-slate-50/80' : ''
+                                      }`}
+                                    >
+                                      <div className="flex items-center gap-3.5">
+                                        <type.icon size={18} strokeWidth={2.25} className="text-slate-400 group-hover:text-emerald-500 transition-colors" />
+                                        <span className="text-[0.9375rem] font-medium text-slate-600 group-hover:text-slate-900 transition-colors">
+                                          {type.label}
+                                        </span>
+                                      </div>
+                                      <ChevronRight size={16} strokeWidth={2.5} className="text-slate-300 group-hover:text-emerald-500 transition-all duration-300 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
+                                    </Link>
+                                  )
+                                ))}
+                              </div>
+                            </div>
 
                            </div>
                          </div>

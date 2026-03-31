@@ -4,6 +4,7 @@ import { FileText, Download, Eye, ChevronRight, ArrowLeft, AlertCircle } from 'l
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { getDisplaySemester } from "../lib/utils";
+import { materials } from '../data/materials';
 
 interface Material {
   id: string;
@@ -53,6 +54,19 @@ const commonFirstYear: Record<string, string[]> = {
 
 const getOriginalSubjectName = (branch: string, semesterNumber: string, subjectSlug: string): string => {
   const currentSemLabel = getDisplaySemester(semesterNumber || '1-1');
+
+  // New centralized materials keys:
+  // - UI may pass the subject key directly (e.g. "ADS", "Computer Networks", "P&S")
+  // - Or it may pass a slugified variant depending on the page.
+  const semesterMaterials = (materials as any)?.[currentSemLabel] as Record<string, string> | undefined;
+  if (semesterMaterials && subjectSlug) {
+    if (Object.prototype.hasOwnProperty.call(semesterMaterials, subjectSlug)) return subjectSlug;
+
+    // Fallback: try matching by slugified keys.
+    const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const foundKey = Object.keys(semesterMaterials).find((k) => slugify(k) === subjectSlug);
+    if (foundKey) return foundKey;
+  }
   
   let subjectsList: string[] = [];
   if (currentSemLabel.startsWith('1-')) {

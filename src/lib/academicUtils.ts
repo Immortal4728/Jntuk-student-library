@@ -32,26 +32,27 @@ export type AcademicData = {
 export const uid = (): string =>
   Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
-// ─── SGPA for a single semester ───
+// ─── SGPA for a single semester (full precision; round only in UI) ───
 export function calcSGPA(subjects: Subject[]): number {
   if (!subjects || subjects.length === 0) return 0;
   let totalCredits = 0;
-  let weightedSum = 0;
+  let totalPoints = 0;
 
   for (const sub of subjects) {
-    const gp = GRADE_POINTS[sub.grade];
-    if (gp === undefined) continue;
-    weightedSum += gp * sub.credits;
-    totalCredits += sub.credits;
+    const gradePoint = GRADE_POINTS[sub.grade];
+    if (gradePoint === undefined) continue;
+    const credit = Number(sub.credits) || 0;
+    totalPoints += gradePoint * credit;
+    totalCredits += credit;
   }
 
   if (totalCredits === 0) return 0;
-  return parseFloat((weightedSum / totalCredits).toFixed(2));
+  return totalPoints / totalCredits;
 }
 
 // ─── Total credits for a semester ───
 export function totalCredits(subjects: Subject[]): number {
-  return subjects.reduce((sum, s) => sum + s.credits, 0);
+  return subjects.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
 }
 
 // ─── Backlog count for a semester ───
@@ -59,30 +60,37 @@ export function backlogCount(subjects: Subject[]): number {
   return subjects.filter((s) => s.grade === "F").length;
 }
 
-// ─── CGPA: weighted average across all semesters ───
+// ─── CGPA: weighted average across all semesters (full precision; round only in UI) ───
 export function calcCGPA(semesters: Semester[]): number {
   if (!semesters || semesters.length === 0) return 0;
 
   let totalCredits = 0;
-  let weightedSum = 0;
+  let totalPoints = 0;
 
   for (const sem of semesters) {
     for (const sub of sem.subjects) {
-      const gp = GRADE_POINTS[sub.grade];
-      if (gp === undefined) continue;
-      weightedSum += gp * sub.credits;
-      totalCredits += sub.credits;
+      const gradePoint = GRADE_POINTS[sub.grade];
+      if (gradePoint === undefined) continue;
+      const credit = Number(sub.credits) || 0;
+      totalPoints += gradePoint * credit;
+      totalCredits += credit;
     }
   }
 
   if (totalCredits === 0) return 0;
-  return parseFloat((weightedSum / totalCredits).toFixed(2));
+  return totalPoints / totalCredits;
 }
 
-// ─── Percentage from CGPA ───
+/** 2-decimal GPA string for display only. */
+export function formatGpa(n: number): string {
+  if (!Number.isFinite(n)) return "—";
+  return n.toFixed(2);
+}
+
+// ─── Percentage from CGPA (full precision for logic) ───
 export function cgpaToPercentage(cgpa: number): number {
   if (cgpa <= 0) return 0;
-  return parseFloat(((cgpa - 0.75) * 10).toFixed(1));
+  return (cgpa - 0.75) * 10;
 }
 
 // ─── Class from CGPA ───
