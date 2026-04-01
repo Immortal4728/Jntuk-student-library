@@ -1,14 +1,14 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard, Users, BookOpen, LogOut, Trash2,
   Shield, Eye, Settings, Server, Database, Activity,
-  ChevronRight, AlertTriangle, RefreshCcw, X, Loader2
+  AlertTriangle, RefreshCcw, Loader2
 } from "lucide-react";
 import { db } from "../lib/firebase";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { materials } from "../data/materials";
-import { normalizeSemester, getDisplaySemester } from "../lib/utils";
+import { getDisplaySemester } from "../lib/utils";
 
 const NAV = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },

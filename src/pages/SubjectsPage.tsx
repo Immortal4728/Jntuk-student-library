@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { ChevronRight, FileText, ArrowLeft, ChevronDown, Clock, Construction, Download, BookOpen } from 'lucide-react';
+import { FileText, ArrowLeft, ChevronDown, Clock, Construction, Download, BookOpen } from 'lucide-react';
 import { getDisplaySemester } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../components/SEO';
