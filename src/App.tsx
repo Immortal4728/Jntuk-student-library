@@ -7,15 +7,14 @@ import HomePage from './pages/HomePage';
 import MaterialsPage from './pages/MaterialsPage';
 import SemesterListPage from './pages/SemesterListPage';
 import SubjectsPage from './pages/SubjectsPage';
-import FilesPage from './pages/FilesPage';
 import ControlCenter from './pages/ControlCenter';
 import AboutPage from './pages/AboutPage';
 import StudentLoginPage from './pages/StudentLoginPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import DashboardPage from './pages/DashboardPage';
 import DashboardMaterialsPage from './pages/DashboardMaterialsPage';
-import SavedMaterialsPage from './pages/SavedMaterialsPage';
 import AcademicTrackerPage from './pages/AcademicTrackerPage';
+import ResultsHubPage from './pages/ResultsHubPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -46,7 +45,6 @@ export default function App() {
             <Route path="/materials" element={<MaterialsPage />} />
             <Route path="/materials/:branch" element={<SemesterListPage />} />
             <Route path="/materials/:branch/semester/:semesterNumber" element={<SubjectsPage />} />
-            <Route path="/materials/:branch/semester/:semesterNumber/:subjectId" element={<FilesPage />} />
             <Route path="/control-center" element={<ControlCenter />} />
           </Route>
 
@@ -68,11 +66,12 @@ export default function App() {
                 </ProtectedRoute>
               } 
             />
+
             <Route 
-              path="/dashboard/saved" 
+              path="/dashboard/results" 
               element={
                 <ProtectedRoute>
-                  <SavedMaterialsPage />
+                  <ResultsHubPage />
                 </ProtectedRoute>
               } 
             />

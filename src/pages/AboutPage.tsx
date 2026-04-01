@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, FileText, HelpCircle, Zap, Layout, Shield, RefreshCw } from 'lucide-react';
+import { BookOpen, Zap, Layout, Shield, RefreshCw } from 'lucide-react';
 import SEO from '../components/SEO';
 
 const stagger = {
@@ -26,20 +26,6 @@ const FEATURES = [
     desc: 'Unit-wise notes, lab manuals, and reference materials organized by branch and semester.',
     color: '#6366f1',
     bg: 'rgba(99,102,241,0.08)',
-  },
-  {
-    icon: FileText,
-    title: 'Previous Question Papers',
-    desc: 'Complete archive of PYQs from 2019–2024, sorted and instantly downloadable.',
-    color: '#0ea5e9',
-    bg: 'rgba(14,165,233,0.08)',
-  },
-  {
-    icon: HelpCircle,
-    title: 'Important Questions & Notes',
-    desc: 'Curated sets of high-yield questions that frequently appear in exams.',
-    color: '#f59e0b',
-    bg: 'rgba(245,158,11,0.08)',
   },
 ];
 
@@ -253,63 +239,7 @@ export default function AboutPage() {
           </motion.div>
         </motion.section>
 
-        {/* ─── SUPPORT ─── */}
-        <motion.section
-          className="pt-12 sm:pt-14 pb-12 sm:pb-14 md:pt-16 md:pb-16 border-b border-[#e5e7eb]/60"
-          variants={stagger}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-60px' }}
-        >
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-16">
-            {/* Left: Text */}
-            <motion.div className="w-full lg:max-w-[420px]" variants={fade}>
-              <h2 className="text-xl sm:text-2xl md:text-[1.75rem] font-bold text-[#0f172a] tracking-tight mb-3">
-                Support the Platform
-              </h2>
-              <p className="text-[14px] sm:text-[15px] text-[#64748b] leading-[1.7] mb-5">
-                Maintained entirely by one person. Direct support pays for hosting, 
-                database infrastructure, and ongoing content updates.
-              </p>
-              <p className="text-[11px] font-semibold tracking-[0.08em] uppercase text-[#94a3b8]">
-                Completely optional — always appreciated.
-              </p>
-            </motion.div>
 
-            {/* Right: Payment Panel */}
-            <motion.div
-              className="w-full lg:w-[380px] flex-shrink-0"
-              variants={fade}
-            >
-              <div className="rounded-2xl border border-[#e2e5ea] bg-white p-5 sm:p-7 shadow-sm">
-                {/* Amount Chips */}
-                <div className="flex gap-2.5 mb-5">
-                  {['₹50', '₹100', '₹200'].map((amount) => (
-                    <button
-                      key={amount}
-                      className="flex-1 py-3 sm:py-2.5 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] text-[14px] sm:text-[0.875rem] font-semibold text-[#64748b] hover:border-[#cbd5e1] hover:bg-white active:scale-[0.98] transition-all"
-                    >
-                      {amount}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Primary Button */}
-                <button className="w-full py-3.5 rounded-xl bg-[#0f172a] text-white text-[14px] sm:text-[15px] font-semibold hover:bg-[#1e293b] active:scale-[0.98] transition-all mb-4 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
-                  Support via Razorpay
-                </button>
-
-                {/* Subtext */}
-                <div className="flex items-center justify-center gap-1.5">
-                  <svg className="w-3.5 h-3.5 text-[#94a3b8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  <span className="text-[11px] font-medium text-[#94a3b8]">Secure transaction</span>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </motion.section>
 
         {/* ─── CLOSING TRUST SIGNAL ─── */}
         <motion.section

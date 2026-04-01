@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronRight, ChevronDown, BookCopy, MessageSquare, FlaskConical, Calculator, Wrench, Terminal, Atom, Binary, Zap, PenTool, Database, FileText } from 'lucide-react';
+import { ChevronRight, ChevronDown, BookCopy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../components/SEO';
 
@@ -9,35 +9,14 @@ const years = [
     id: 'year-1',
     title: '1st Year',
     subtitle: 'Common for all branches',
-    isCommon: true,
     iconColor: 'text-blue-500',
     bgTint: 'bg-blue-50/40',
     indicator: 'bg-blue-500',
     borderActive: 'border-blue-200/60',
     shadow: 'shadow-[0_8px_30px_rgba(59,130,246,0.06)]',
     semesters: [
-      { 
-        number: '1-1', 
-        label: '1-1 Semester',
-        subjects: [
-          { id: '1-1-eng', name: 'Communicative English', Icon: MessageSquare },
-          { id: '1-1-chem', name: 'Engineering Chemistry', Icon: FlaskConical },
-          { id: '1-1-math1', name: 'Linear Algebra & Calculus', Icon: Calculator },
-          { id: '1-1-cme', name: 'Basic Civil & Mechanical Engineering', Icon: Wrench },
-          { id: '1-1-cp', name: 'Introduction to Programming (C)', Icon: Terminal },
-        ]
-      },
-      { 
-        number: '1-2', 
-        label: '1-2 Semester',
-        subjects: [
-          { id: '1-2-phy', name: 'Engineering Physics', Icon: Atom },
-          { id: '1-2-math2', name: 'Differential Equations & Vector Calculus', Icon: Binary },
-          { id: '1-2-eee', name: 'Basic Electrical and Electronics Engineering', Icon: Zap },
-          { id: '1-2-eg', name: 'Engineering Graphics', Icon: PenTool },
-          { id: '1-2-ds', name: 'Data Structures', Icon: Database },
-        ]
-      },
+      { number: '1-1', label: '1-1' },
+      { number: '1-2', label: '1-2' },
     ],
   },
   {
@@ -186,78 +165,41 @@ export default function SemesterListPage() {
                       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                       className="relative z-10"
                     >
-                      {year.isCommon ? (
-                        <div className="px-5 pb-6 sm:px-6 sm:pb-7 flex flex-col gap-6">
-                          {year.semesters.map((sem) => (
-                            <div key={sem.number}>
-                              <div className="flex items-center gap-2 mb-3 pl-1">
-                                <p className="text-[11px] font-bold text-slate-400 tracking-wider uppercase">
-                                  {sem.label}
-                                </p>
-                                <span className="px-2 py-0.5 rounded-full bg-blue-100 text-[9px] font-bold text-blue-600 uppercase tracking-widest">
-                                  Common
+                      <div className="px-5 pb-6 sm:px-6 sm:pb-7">
+                        <p className="text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-3 pl-1">
+                          Select Semester
+                        </p>
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                          {year.semesters.map((sem) => {
+                            const isSoon = 'comingSoon' in sem && sem.comingSoon;
+                            return (
+                            <Link
+                              key={sem.number}
+                              to={`/materials/${branch}/semester/${sem.number}`}
+                              className={`group relative flex flex-col items-center justify-center rounded-xl border shadow-sm active:scale-[0.97] active:shadow-none transition-all duration-200 overflow-hidden ${
+                                isSoon
+                                  ? 'h-[4.5rem] bg-gradient-to-b from-amber-50/60 to-white border-amber-200/60 hover:border-amber-300'
+                                  : 'h-16 bg-gradient-to-b from-white to-slate-50/50 border-slate-200 hover:border-slate-300 hover:shadow-md'
+                              }`}
+                            >
+                              {/* Hover Glow / Selection Flash */}
+                              <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/[0.02] group-active:bg-slate-900/[0.04] transition-colors duration-200" />
+                              
+                              <span className={`relative z-10 text-[1.125rem] font-bold tracking-tight transition-colors duration-200 ${
+                                isSoon ? 'text-slate-500 group-hover:text-slate-700' : 'text-slate-600 group-hover:text-slate-900'
+                              }`}>
+                                {sem.label}
+                              </span>
+                              {isSoon && (
+                                <span className="relative z-10 mt-1 px-2 py-0.5 rounded-full bg-amber-100 text-[9px] font-bold text-amber-700 tracking-[0.08em] uppercase">
+                                  Coming Soon
                                 </span>
-                              </div>
-                              <div className="flex flex-col gap-2">
-                                {sem.subjects?.map((subject) => (
-                                  <Link
-                                    key={subject.id}
-                                    to={`/materials/${branch}/semester/${sem.number}/${subject.id}`}
-                                    className="group flex items-center gap-3.5 p-3.5 rounded-[14px] bg-slate-50 border border-slate-200/70 hover:bg-white hover:border-slate-300 hover:shadow-sm active:scale-[0.98] transition-all duration-200"
-                                  >
-                                    <div className="w-10 h-10 rounded-[10px] bg-white border border-slate-200/80 flex items-center justify-center flex-shrink-0 group-hover:border-blue-200 group-hover:bg-blue-50/50 transition-colors duration-200">
-                                      {subject.Icon ? (
-                                        <subject.Icon size={18} className="text-slate-400 group-hover:text-blue-600 transition-colors duration-200" />
-                                      ) : (
-                                        <FileText size={18} className="text-slate-400 group-hover:text-blue-600 transition-colors duration-200" />
-                                      )}
-                                    </div>
-                                    <span className="text-[0.9375rem] font-bold text-slate-600 group-hover:text-slate-900 transition-colors duration-200">
-                                      {subject.name}
-                                    </span>
-                                  </Link>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
+                              )}
+                            </Link>
+                            );
+                          })}
                         </div>
-                      ) : (
-                        <div className="px-5 pb-6 sm:px-6 sm:pb-7">
-                          <p className="text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-3 pl-1">
-                            Select Semester
-                          </p>
-                          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                            {year.semesters.map((sem) => {
-                              const isSoon = 'comingSoon' in sem && sem.comingSoon;
-                              return (
-                              <Link
-                                key={sem.number}
-                                to={`/materials/${branch}/semester/${sem.number}`}
-                                className={`group relative flex flex-col items-center justify-center rounded-xl border shadow-sm active:scale-[0.97] active:shadow-none transition-all duration-200 overflow-hidden ${
-                                  isSoon
-                                    ? 'h-[4.5rem] bg-gradient-to-b from-amber-50/60 to-white border-amber-200/60 hover:border-amber-300'
-                                    : 'h-16 bg-gradient-to-b from-white to-slate-50/50 border-slate-200 hover:border-slate-300 hover:shadow-md'
-                                }`}
-                              >
-                                {/* Hover Glow / Selection Flash */}
-                                <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/[0.02] group-active:bg-slate-900/[0.04] transition-colors duration-200" />
-                                
-                                <span className={`relative z-10 text-[1.125rem] font-bold tracking-tight transition-colors duration-200 ${
-                                  isSoon ? 'text-slate-500 group-hover:text-slate-700' : 'text-slate-600 group-hover:text-slate-900'
-                                }`}>
-                                  {sem.label}
-                                </span>
-                                {isSoon && (
-                                  <span className="relative z-10 mt-1 px-2 py-0.5 rounded-full bg-amber-100 text-[9px] font-bold text-amber-700 tracking-[0.08em] uppercase">
-                                    Coming Soon
-                                  </span>
-                                )}
-                              </Link>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>

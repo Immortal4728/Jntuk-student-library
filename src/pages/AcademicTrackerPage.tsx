@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import {
   GraduationCap,
   Calculator,
@@ -10,7 +12,6 @@ import {
   Plus,
   Trash2,
   ChevronDown,
-  ChevronUp,
   Edit3,
   Award,
   Star,
@@ -21,6 +22,7 @@ import {
   Info,
   Check,
   BookMarked,
+  Download,
 } from "lucide-react";
 import {
   GRADE_POINTS,
@@ -59,6 +61,7 @@ function CircularProgress({
   color = "#6366f1",
   size = 120,
   displayDecimals = 2,
+  hideMax = false,
 }: {
   value: number;
   max: number;
@@ -66,6 +69,7 @@ function CircularProgress({
   color?: string;
   size?: number;
   displayDecimals?: number;
+  hideMax?: boolean;
 }) {
   const radius = (size - 12) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -73,14 +77,14 @@ function CircularProgress({
   const offset = circumference - progress * circumference;
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-3">
       <div className="relative" style={{ width: size, height: size }}>
-        <svg className="transform -rotate-90" width={size} height={size}>
+        <svg className="transform -rotate-90 drop-shadow-sm" width={size} height={size}>
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke="#e2e8f0"
+            stroke="#f1f5f9"
             strokeWidth="8"
             fill="transparent"
           />
@@ -98,30 +102,24 @@ function CircularProgress({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-black text-slate-900 tracking-tight">
+          <span
+            className={`${
+              hideMax ? "text-3xl" : "text-2xl"
+            } font-black text-slate-900 tracking-tight`}
+          >
             {Number.isFinite(value) ? value.toFixed(displayDecimals) : "—"}
           </span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            / {max}
-          </span>
+          {!hideMax && (
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+              / {max}
+            </span>
+          )}
         </div>
       </div>
-      <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-full">
         {label}
       </span>
     </div>
-  );
-}
-
-// ─── Grade Badge ───
-function GradeBadge({ grade }: { grade: string }) {
-  const { bg, text } = gradeColor(grade);
-  return (
-    <span
-      className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-black ${bg} ${text} transition-all`}
-    >
-      {grade}
-    </span>
   );
 }
 
@@ -137,6 +135,17 @@ export default function AcademicTrackerPage() {
   const [saveToast, setSaveToast] = useState(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [gradeInfoOpen, setGradeInfoOpen] = useState(false);
+  const [animateBars, setAnimateBars] = useState(false);
+  const [downloadState, setDownloadState] = useState<"idle" | "loading" | "success">("idle");
+
+  // ─── Animate Progress Bars ───
+  useEffect(() => {
+    if (activeTab === "cgpa") {
+      setAnimateBars(false);
+      const timer = setTimeout(() => setAnimateBars(true), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab]);
 
   // ─── Load from Firebase ───
   useEffect(() => {
@@ -173,6 +182,12 @@ export default function AcademicTrackerPage() {
       try {
         const docRef = doc(db, "users", user.uid, "academics", "data");
         await setDoc(docRef, { semesters: data, updatedAt: new Date().toISOString() });
+
+        // Calculate CGPA and update the main user document
+        const currentCgpa = calcCGPA(data);
+        const userDocRef = doc(db, "users", user.uid);
+        await setDoc(userDocRef, { cgpa: currentCgpa, updatedAt: new Date().toISOString() }, { merge: true });
+
         setSaveToast(true);
         setTimeout(() => setSaveToast(false), 1500);
       } catch (err) {
@@ -264,6 +279,52 @@ export default function AcademicTrackerPage() {
   const allCredits = totalCreditsAll(semesters);
   const activeSem = semesters.find((s) => s.semId === activeSemTab);
 
+  // ─── Generate PDF ───
+  const generatePDF = async () => {
+    const element = document.getElementById("pdf-report-root");
+    if (!element) return;
+    
+    // Render the hidden layout
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    
+    const imgWidth = 210;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+    
+    const rollNum = (user as any)?.rollNumber || "Student";
+    pdf.save(`JNTUK_Report_${rollNum}.pdf`);
+  };
+
+  // ─── Download Handler ───
+  const handleDownload = async () => {
+    if (downloadState !== "idle") return;
+    setDownloadState("loading");
+    
+    try {
+      // Small delay to ensure the DOM is ready + UX formatting
+      await new Promise((res) => setTimeout(res, 1000));
+      await generatePDF();
+      
+      setDownloadState("success");
+    } catch (e) {
+      console.error("PDF generation failed:", e);
+      setDownloadState("idle");
+      return;
+    }
+    
+    setTimeout(() => {
+      setDownloadState("idle");
+    }, 1500);
+  };
+
   // ─── Loading State ───
   if (loading) {
     return (
@@ -297,15 +358,15 @@ export default function AcademicTrackerPage() {
       </header>
 
       {/* ─── TAB BAR ─── */}
-      <div className="flex bg-white rounded-2xl border border-slate-200 p-1.5 shadow-sm">
+      <div className="flex bg-white rounded-2xl border border-gray-200 p-1.5 shadow-sm">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-sm font-bold transition-all duration-300 ${
               activeTab === tab.key
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
-                : "text-slate-500 hover:bg-slate-50 active:bg-slate-100"
+                ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/30"
+                : "text-gray-500 hover:bg-gray-50 active:bg-gray-100"
             }`}
           >
             <tab.icon className="w-4 h-4" />
@@ -343,7 +404,7 @@ export default function AcademicTrackerPage() {
           TAB 1: SGPA VIEW — Expandable Semester Cards
          ═══════════════════════════════════════════════════════════════ */}
       {activeTab === "sgpa" && !isEmpty && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {semesters.map((sem) => {
             const sgpa = calcSGPA(sem.subjects);
             const pct = cgpaToPercentage(sgpa);
@@ -354,109 +415,182 @@ export default function AcademicTrackerPage() {
             return (
               <div
                 key={sem.semId}
-                className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-300"
+                className="bg-[#ffffff] rounded-[16px] border border-gray-200 overflow-hidden transition-all duration-300 group hover:shadow-md hover:border-indigo-200"
               >
                 {/* Collapsed Header */}
                 <button
                   onClick={() => setExpandedSem(isExpanded ? null : sem.semId)}
-                  className="w-full text-left p-5 flex items-center justify-between gap-4 hover:bg-slate-50/50 active:bg-slate-50 transition-colors"
+                  className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 transition-colors relative"
                 >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-11 h-11 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-indigo-500/20">
+                  {/* Left: Semester label */}
+                  <div className="flex items-center gap-3 min-w-0 flex-shrink-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-sm">
                       <span className="text-white text-sm font-black">{sem.semId}</span>
                     </div>
-                    <div className="min-w-0">
-                      <h3 className="text-sm font-bold text-slate-900 truncate">
-                        {sem.semId} Semester
-                      </h3>
-                      <div className="flex items-center gap-3 mt-0.5">
-                        <span className="text-xs font-semibold text-indigo-600">
-                          {formatGpa(sgpa)} SGPA
+                    <h3 className="text-[15px] font-bold text-gray-800 whitespace-nowrap">
+                      {sem.semId} Sem
+                    </h3>
+                  </div>
+
+                  {/* Right: Inline Metrics + Arrow */}
+                  <div className="flex items-center gap-4 sm:gap-6 ml-auto flex-shrink-0">
+                    <div className="hidden sm:flex items-center gap-5 text-right">
+                      {backs > 0 && (
+                        <div className="flex flex-col items-end justify-center">
+                          <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-widest leading-none mb-1.5">Backlogs</span>
+                          <span className="text-xs font-black text-red-500 bg-red-50 px-2 py-0.5 rounded flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            {backs}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex flex-col items-end justify-center hidden md:flex">
+                        <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-widest leading-none mb-1.5">%</span>
+                        <span className="text-[13px] font-bold text-gray-600">
+                          {pct.toFixed(2)}
                         </span>
-                        <span className="text-[10px] text-slate-400">•</span>
-                        <span className="text-xs text-slate-500">{pct}%</span>
-                        {backs > 0 && (
-                          <>
-                            <span className="text-[10px] text-slate-400">•</span>
-                            <span className="text-xs font-bold text-red-500 flex items-center gap-1">
-                              <AlertTriangle className="w-3 h-3" />
-                              {backs}
-                            </span>
-                          </>
-                        )}
+                      </div>
+                      <div className="flex flex-col items-end justify-center">
+                        <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-widest leading-none mb-1.5">SGPA</span>
+                        <span className="text-[15px] font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600">
+                          {formatGpa(sgpa)}
+                        </span>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider hidden sm:block">
-                      {credits} credits
-                    </span>
-                    {isExpanded ? (
-                      <ChevronUp className="w-5 h-5 text-slate-400" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5 text-slate-400" />
-                    )}
+
+                    {/* Mobile simplified view */}
+                    <div className="flex items-center gap-3 sm:hidden">
+                      <div className="flex flex-col items-end justify-center">
+                        <span className="text-[10px] font-bold text-[#6b7280] uppercase tracking-widest leading-none mb-1">SGPA</span>
+                        <span className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center gap-1.5">
+                          {backs > 0 && <AlertTriangle className="w-3 h-3 text-red-500" />}
+                          {formatGpa(sgpa)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={`w-8 h-8 flex items-center justify-center rounded-full text-[#6b7280] transition-transform duration-300 ${isExpanded ? "rotate-180 bg-purple-50 text-indigo-600" : "bg-gray-50 group-hover:bg-gray-100"}`}>
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
                   </div>
                 </button>
 
                 {/* Expanded Body */}
                 <div
-                  className={`overflow-hidden transition-all duration-300 ease-out ${
-                    isExpanded ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+                  className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+                    isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                   }`}
                 >
-                  <div className="px-5 pb-5 border-t border-slate-100">
-                    {sem.subjects.length === 0 ? (
-                      <p className="text-sm text-slate-400 text-center py-6">
-                        No subjects added yet
-                      </p>
-                    ) : (
-                      <div className="divide-y divide-slate-100">
-                        {sem.subjects.map((sub) => (
-                          <div
-                            key={sub.id}
-                            className="flex items-center justify-between py-3.5 gap-3"
-                          >
-                            <div className="flex items-center gap-3 min-w-0 flex-1">
-                              <GradeBadge grade={sub.grade} />
-                              <div className="min-w-0 flex-1">
-                                <p className="text-sm font-semibold text-slate-800 truncate">
-                                  {sub.name || "Unnamed Subject"}
-                                </p>
-                                <p className="text-[11px] text-slate-400 mt-0.5">
-                                  {sub.credits} credits • {GRADE_POINTS[sub.grade] ?? 0} pts
-                                </p>
-                              </div>
-                            </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveTab("calculator");
-                                setActiveSemTab(sem.semId);
-                              }}
-                              className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                            >
-                              <Edit3 className="w-4 h-4" />
-                            </button>
+                  <div className="overflow-hidden">
+                    <div className="px-5 pb-5 pt-1 border-t border-gray-100 bg-[#ffffff]">
+                      {sem.subjects.length === 0 ? (
+                        <p className="text-sm text-[#6b7280] text-center py-6">
+                          No subjects added yet
+                        </p>
+                      ) : (
+                        <div className="flex flex-col">
+                          {/* Table Header */}
+                          <div className="grid grid-cols-[1fr_auto_auto] gap-4 py-2.5 border-b border-gray-200 mb-1">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Subject</span>
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center w-12">Grade</span>
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right w-12">Credits</span>
                           </div>
-                        ))}
-                      </div>
-                    )}
 
-                    {/* Footer */}
-                    <div className="flex items-center justify-between pt-3 mt-1 border-t border-slate-100">
-                      <span className="text-xs font-bold text-slate-500">
-                        Total Credits
-                      </span>
-                      <span className="text-sm font-black text-indigo-600">
-                        {credits}
-                      </span>
+                          {/* Subject Rows */}
+                          <div className="divide-y divide-[#f1f5f9]">
+                            {sem.subjects.map((sub) => (
+                              <div
+                                key={sub.id}
+                                className="grid grid-cols-[1fr_auto_auto] gap-4 py-3 items-center group/row"
+                              >
+                                {/* Subject Name */}
+                                <div className="min-w-0 pr-2">
+                                  <p className="text-[13px] font-semibold text-gray-800 truncate">
+                                    {sub.name || "Unnamed Subject"}
+                                  </p>
+                                </div>
+                                {/* Grade Badge */}
+                                <div className="w-12 flex justify-center">
+                                  <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-black ${gradeColor(sub.grade).bg} ${gradeColor(sub.grade).text}`}>
+                                    {sub.grade}
+                                  </span>
+                                </div>
+                                {/* Credits */}
+                                <div className="w-12 flex justify-end">
+                                  <span className="text-[13px] font-bold text-gray-600">
+                                    {sub.credits}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Footer / Total Row */}
+                      {sem.subjects.length > 0 && (
+                        <div className="flex items-center justify-end gap-6 pt-3.5 mt-2 border-t border-[#f1f5f9]">
+                          <span className="text-[11px] font-bold text-[#6b7280] uppercase tracking-widest">
+                            Total Credits
+                          </span>
+                          <span className="text-[15px] font-black text-gray-900 w-12 text-right">
+                            {credits}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Edit button shortcut */}
+                      <div className="mt-5 flex justify-end">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveTab("calculator");
+                            setActiveSemTab(sem.semId);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          Edit Semester
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             );
           })}
+
+          {/* Download Report Button */}
+          <button
+            onClick={handleDownload}
+            disabled={downloadState !== "idle"}
+            className={`flex w-fit mx-auto mt-8 mb-6 items-center justify-center min-w-[200px] gap-2.5 px-6 py-3.5 rounded-xl text-white font-semibold transition-all duration-300 print:hidden ${
+              downloadState === "idle"
+                ? "bg-gradient-to-r from-purple-500 to-indigo-600 shadow-md hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] hover:-translate-y-0.5 hover:scale-105 active:scale-95 cursor-pointer"
+                : downloadState === "loading"
+                ? "bg-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.5)] scale-95 opacity-90 cursor-not-allowed"
+                : "bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)] scale-100"
+            }`}
+          >
+            {downloadState === "idle" && (
+              <>
+                <Download className="w-5 h-5" />
+                <span className="tracking-wide">Download Report</span>
+              </>
+            )}
+            {downloadState === "loading" && (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="tracking-wide">Generating Report...</span>
+              </>
+            )}
+            {downloadState === "success" && (
+              <div className="flex items-center gap-2 animate-in fade-in zoom-in duration-300">
+                <Check className="w-5 h-5" />
+                <span className="tracking-wide">Download Ready</span>
+              </div>
+            )}
+          </button>
         </div>
       )}
 
@@ -464,16 +598,18 @@ export default function AcademicTrackerPage() {
           TAB 2: CGPA OVERVIEW DASHBOARD
          ═══════════════════════════════════════════════════════════════ */}
       {activeTab === "cgpa" && !isEmpty && (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Top: Circular Progress Indicators */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <div className="flex items-center justify-center gap-8 sm:gap-14">
+          <div className="bg-white rounded-[24px] border border-slate-100 p-8 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all">
+            <div className="flex items-center justify-center gap-10 sm:gap-20">
               <CircularProgress
                 value={cgpa}
                 max={10}
                 label="CGPA"
-                color="#6366f1"
+                color="#8b5cf6"
                 size={120}
+                displayDecimals={2}
+                hideMax={true}
               />
               <CircularProgress
                 value={percentage}
@@ -481,28 +617,29 @@ export default function AcademicTrackerPage() {
                 label="Percentage"
                 color="#8b5cf6"
                 size={120}
-                displayDecimals={1}
+                displayDecimals={2}
+                hideMax={true}
               />
             </div>
           </div>
 
           {/* Quick Stats Row */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {/* Total Backlogs */}
             <div
-              className={`rounded-2xl border p-5 shadow-sm transition-all ${
+              className={`rounded-[24px] border p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all ${
                 allBacklogs > 0
-                  ? "bg-red-50 border-red-200"
-                  : "bg-emerald-50 border-emerald-200"
+                  ? "bg-red-50 border-red-100"
+                  : "bg-emerald-50 border-emerald-100"
               }`}
             >
               <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${
                   allBacklogs > 0 ? "bg-red-100" : "bg-emerald-100"
                 }`}
               >
                 <AlertTriangle
-                  className={`w-5 h-5 ${
+                  className={`w-6 h-6 ${
                     allBacklogs > 0 ? "text-red-600" : "text-emerald-600"
                   }`}
                 />
@@ -514,11 +651,11 @@ export default function AcademicTrackerPage() {
             </div>
 
             {/* Class Awarded */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-              <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center mb-3">
-                <Star className="w-5 h-5 text-amber-600" />
+            <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all">
+              <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-4">
+                <Star className="w-6 h-6 text-amber-600" />
               </div>
-              <p className="text-lg font-black text-slate-900 leading-tight">
+              <p className="text-xl font-black text-slate-900 leading-tight">
                 {classAwarded}
               </p>
               <p className="text-[11px] font-bold text-slate-500 mt-1 uppercase tracking-widest">
@@ -528,35 +665,35 @@ export default function AcademicTrackerPage() {
           </div>
 
           {/* Summary Card */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">
+          <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all">
+            <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-6 px-1">
               Summary
             </h3>
             <div className="grid grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center mx-auto mb-2">
-                  <Zap className="w-5 h-5 text-indigo-600" />
+              <div className="text-center group">
+                <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-105 transition-transform duration-300">
+                  <Zap className="w-6 h-6 text-indigo-600" />
                 </div>
-                <p className="text-lg font-black text-slate-900">{formatGpa(cgpa)}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <p className="text-xl font-black text-slate-900">{formatGpa(cgpa)}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
                   Max CGPA
                 </p>
               </div>
-              <div className="text-center">
-                <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center mx-auto mb-2">
-                  <TrendingUp className="w-5 h-5 text-violet-600" />
+              <div className="text-center group">
+                <div className="w-12 h-12 bg-violet-50 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-105 transition-transform duration-300">
+                  <TrendingUp className="w-6 h-6 text-violet-600" />
                 </div>
-                <p className="text-lg font-black text-slate-900">{percentage}%</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <p className="text-xl font-black text-slate-900">{percentage.toFixed(2)}%</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
                   Percentage
                 </p>
               </div>
-              <div className="text-center">
-                <div className="w-10 h-10 bg-cyan-50 rounded-xl flex items-center justify-center mx-auto mb-2">
-                  <BookOpen className="w-5 h-5 text-cyan-600" />
+              <div className="text-center group">
+                <div className="w-12 h-12 bg-cyan-50 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-105 transition-transform duration-300">
+                  <BookOpen className="w-6 h-6 text-cyan-600" />
                 </div>
-                <p className="text-lg font-black text-slate-900">{allCredits}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <p className="text-xl font-black text-slate-900">{allCredits}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
                   Credits
                 </p>
               </div>
@@ -564,28 +701,28 @@ export default function AcademicTrackerPage() {
           </div>
 
           {/* Semester Breakdown */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">
+          <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all">
+            <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-5 px-1">
               Semester Breakdown
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {semesters.map((sem) => {
                 const sgpa = calcSGPA(sem.subjects);
                 const maxPossible = 10;
                 const pctBar = maxPossible > 0 ? (sgpa / maxPossible) * 100 : 0;
 
                 return (
-                  <div key={sem.semId} className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-slate-500 w-8 flex-shrink-0">
+                  <div key={sem.semId} className="group flex items-center gap-4 hover:bg-slate-50/80 p-3 -mx-3 rounded-2xl transition-all duration-300 transform hover:scale-[1.01]">
+                    <span className="text-sm font-bold text-slate-500 w-10 flex-shrink-0 text-right">
                       {sem.semId}
                     </span>
-                    <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="flex-1 h-3.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700 ease-out"
-                        style={{ width: `${pctBar}%` }}
+                        className="h-full rounded-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-1000 ease-out group-hover:brightness-110"
+                        style={{ width: animateBars ? `${pctBar}%` : "0%" }}
                       />
                     </div>
-                    <span className="text-xs font-black text-slate-700 w-10 text-right">
+                    <span className="text-sm font-black text-slate-700 w-10 text-left">
                       {formatGpa(sgpa)}
                     </span>
                   </div>
@@ -650,7 +787,7 @@ export default function AcademicTrackerPage() {
                 ))}
               </div>
               <p className="text-[11px] text-indigo-600 mt-3">
-                SGPA = Σ(grade × credits) / Σ(credits) &nbsp;|&nbsp; % = (CGPA − 0.75) × 10
+                SGPA = Σ(grade × credits) / Σ(credits) &nbsp;|&nbsp; % = CGPA × 9.5
               </p>
             </div>
           </div>
@@ -847,6 +984,123 @@ export default function AcademicTrackerPage() {
           )}
         </div>
       )}
+
+      {/* ─── Elite Loading Overlay Fullscreen ─── */}
+      {downloadState === "loading" && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-900/30 backdrop-blur-sm animate-in fade-in duration-300 print:hidden">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-5 animate-in zoom-in-95 duration-300">
+            <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center relative shadow-inner">
+              <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+              <div className="absolute inset-0 rounded-2xl border-[3px] border-indigo-600/20 animate-ping"></div>
+            </div>
+            <div className="text-center px-4">
+              <h3 className="text-[17px] font-black text-slate-800">Preparing Report...</h3>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">
+                Please Wait
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── HIDDEN PDF REPORT TEMPLATE ─── */}
+      <div id="pdf-report-root" className="absolute left-[-9999px] top-0 bg-white text-black p-12 font-sans w-[800px]">
+        {/* Header */}
+        <div className="flex items-end justify-between border-b-2 border-slate-800 pb-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-black uppercase tracking-wider text-slate-900">University Name</h1>
+            <p className="text-sm font-semibold text-slate-600 uppercase tracking-widest mt-1">Academic Performance Report</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+              Date: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+            </p>
+          </div>
+        </div>
+
+        {/* Student Info */}
+        <div className="grid grid-cols-3 gap-6 mb-10">
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Student Name</p>
+            <p className="text-sm font-bold text-slate-800 mt-1">{(user as any)?.displayName || (user as any)?.name || "Student Name"}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Roll Number</p>
+            <p className="text-sm font-bold text-slate-800 mt-1">{(user as any)?.rollNumber || "N/A"}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Branch</p>
+            <p className="text-sm font-bold text-slate-800 mt-1">{(user as any)?.branch || "N/A"}</p>
+          </div>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-3 gap-6 mb-10">
+          <div className="border border-slate-200 rounded-lg p-5">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest text-center">Cumulative GPA</p>
+            <p className="text-3xl font-black text-slate-900 text-center mt-2">{formatGpa(cgpa)}</p>
+          </div>
+          <div className="border border-slate-200 rounded-lg p-5">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest text-center">Percentage</p>
+            <p className="text-3xl font-black text-slate-900 text-center mt-2">{cgpaToPercentage(cgpa).toFixed(2)}%</p>
+          </div>
+          <div className="border border-slate-200 rounded-lg p-5">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest text-center">Semesters</p>
+            <p className="text-3xl font-black text-slate-900 text-center mt-2">{semesters.length}</p>
+          </div>
+        </div>
+
+        {/* Semester Table */}
+        <table className="w-full text-left border-collapse border border-slate-200">
+          <thead>
+            <tr className="border-b-2 border-slate-200 text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-50">
+              <th className="py-3 px-4 border-r border-slate-200">Semester</th>
+              <th className="py-3 px-4 border-r border-slate-200 text-center">SGPA</th>
+              <th className="py-3 px-4 border-r border-slate-200 text-center">Credits</th>
+              <th className="py-3 px-4 border-r border-slate-200 text-center">Percentage</th>
+              <th className="py-3 px-4 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody className="text-xs">
+            {semesters.map((sem, idx) => {
+              const sGpa = calcSGPA(sem.subjects);
+              const sPct = cgpaToPercentage(sGpa);
+              const sCred = totalCredits(sem.subjects);
+              const sBacks = backlogCount(sem.subjects);
+              
+              return (
+                <tr key={sem.semId} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
+                  <td className="py-3 px-4 font-bold text-slate-800 border-r border-b border-slate-200">{sem.semId} Sem</td>
+                  <td className="py-3 px-4 font-black text-slate-900 text-center border-r border-b border-slate-200">{formatGpa(sGpa)}</td>
+                  <td className="py-3 px-4 font-bold text-slate-600 text-center border-r border-b border-slate-200">{sCred}</td>
+                  <td className="py-3 px-4 font-bold text-slate-600 text-center border-r border-b border-slate-200">{sPct.toFixed(2)}%</td>
+                  <td className="py-3 px-4 text-center border-b border-slate-200">
+                    {sBacks > 0 ? (
+                      <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">
+                        {sBacks} Backlog{sBacks > 1 ? "s" : ""}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
+                        Clear
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        {/* Footer */}
+        <div className="mt-16 pt-6 border-t border-slate-200 flex items-center justify-between">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            Generated by Academic Tracker
+          </p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            {new Date().getFullYear()} Version
+          </p>
+        </div>
+      </div>
 
       {/* ─── Auto-save Toast ─── */}
       <div

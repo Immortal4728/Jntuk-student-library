@@ -22,11 +22,9 @@ export const subjectsData: Record<string, Record<string, string[]>> = {
 
 export const commonFirstYear: Record<string, string[]> = {
   "1-1": [
-    "Communicative English",
     "Engineering Chemistry",
     "Linear Algebra & Calculus",
-    "Basic Civil & Mechanical Engineering",
-    "Introduction to Programming (C)"
+    "Basic Civil & Mechanical Engineering"
   ],
   "1-2": [
     "Engineering Physics",

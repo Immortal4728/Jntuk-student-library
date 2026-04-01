@@ -5,7 +5,6 @@ import {
   LogOut,
   Menu,
   X,
-  Bookmark,
   AlertCircle,
   UserCircle,
   Settings,
@@ -13,6 +12,7 @@ import {
   GraduationCap,
   LibraryBig,
   Pencil,
+  FileBadge,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { getDisplaySemester } from "../lib/utils";
@@ -37,7 +37,7 @@ export default function DashboardSidebar({
   const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/dashboard/materials", icon: LibraryBig, label: "Materials" },
-    { to: "/dashboard/saved", icon: Bookmark, label: "Saved Materials" },
+    { to: "/dashboard/results", icon: FileBadge, label: "Results" },
     {
       to: "#backlogs",
       icon: AlertCircle,

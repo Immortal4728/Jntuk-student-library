@@ -76,37 +76,65 @@ export default function MaterialsPage() {
                 transition={{ duration: 0.3, delay: index * 0.05, ease: 'easeOut' }}
                 key={branch.key}
               >
-                <Link
-                  to={`/materials/${branch.key}`}
-                  className="group block w-full bg-white border border-[#e2e8f0] rounded-2xl p-4 sm:p-5 hover:border-[#cbd5e1] hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] active:scale-[0.98] transition-all duration-200"
-                >
-                  <div className="flex items-center justify-between gap-4">
+                {branch.key === 'CSE' ? (
+                  <Link
+                    to={`/materials/${branch.key}`}
+                    className="group block w-full bg-white border border-[#e2e8f0] rounded-2xl p-4 sm:p-5 hover:border-[#cbd5e1] hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] active:scale-[0.98] transition-all duration-200"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      {/* Left: Icon + Text Content */}
+                      <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+                        <div
+                          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl ${branch.bg} flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-105`}
+                        >
+                          <Icon size={26} style={{ color: branch.accent }} strokeWidth={2.25} />
+                        </div>
 
-                    {/* Left: Icon + Text Content */}
-                    <div className="flex items-center gap-4 sm:gap-5 min-w-0">
-                      <div
-                        className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl ${branch.bg} flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-105`}
-                      >
-                        <Icon size={26} style={{ color: branch.accent }} strokeWidth={2.25} />
+                        <div className="flex flex-col justify-center min-w-0 pr-2">
+                          <span className="text-[1.125rem] sm:text-[1.25rem] font-bold text-[#0f172a] tracking-tight leading-none mb-1.5">
+                            {branch.label}
+                          </span>
+                          <span className="text-[0.875rem] sm:text-[0.9375rem] text-[#64748b] font-medium leading-snug truncate sm:whitespace-normal">
+                            {branch.fullName}
+                          </span>
+                        </div>
                       </div>
 
-                      <div className="flex flex-col justify-center min-w-0 pr-2">
-                        <span className="text-[1.125rem] sm:text-[1.25rem] font-bold text-[#0f172a] tracking-tight leading-none mb-1.5">
-                          {branch.label}
-                        </span>
-                        <span className="text-[0.875rem] sm:text-[0.9375rem] text-[#64748b] font-medium leading-snug truncate sm:whitespace-normal">
-                          {branch.fullName}
-                        </span>
+                      {/* Right: Navigation Arrow */}
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#f8fafc] group-hover:bg-[#f1f5f9] flex items-center justify-center text-[#94a3b8] group-hover:text-[#475569] transition-colors">
+                        <ChevronRight size={20} strokeWidth={2.5} />
                       </div>
                     </div>
+                  </Link>
+                ) : (
+                  <button
+                    disabled
+                    className="block w-full text-left bg-white border border-[#e2e8f0] rounded-2xl p-4 sm:p-5 opacity-60 cursor-not-allowed transition-all duration-200"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      {/* Left: Icon + Text Content */}
+                      <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+                        <div
+                          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gray-50 flex items-center justify-center flex-shrink-0 grayscale`}
+                        >
+                          <Icon size={26} className="text-gray-400" strokeWidth={2.25} />
+                        </div>
 
-                    {/* Right: Navigation Arrow */}
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#f8fafc] group-hover:bg-[#f1f5f9] flex items-center justify-center text-[#94a3b8] group-hover:text-[#475569] transition-colors">
-                      <ChevronRight size={20} strokeWidth={2.5} />
+                        <div className="flex flex-col justify-center min-w-0 pr-2">
+                          <span className="text-[1.125rem] sm:text-[1.25rem] font-bold text-[#0f172a] tracking-tight leading-none mb-1.5 flex items-center gap-2">
+                            {branch.label}
+                            <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap">
+                              Coming Soon
+                            </span>
+                          </span>
+                          <span className="text-[0.875rem] sm:text-[0.9375rem] text-[#64748b] font-medium leading-snug truncate sm:whitespace-normal">
+                            {branch.fullName}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-
-                  </div>
-                </Link>
+                  </button>
+                )}
               </motion.div>
             );
           })}

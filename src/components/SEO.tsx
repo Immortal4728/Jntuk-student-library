@@ -9,11 +9,11 @@ interface SEOProps {
 }
 
 const BASE_URL = 'https://jntuk-student-library.vercel.app';
-const DEFAULT_TITLE = 'JNTUK Materials | Notes, PYQs, Important Questions';
+const DEFAULT_TITLE = 'JNTUK Materials | Notes';
 const DEFAULT_DESCRIPTION =
-  'Access JNTUK semester-wise materials, PYQs, notes, and important questions for CSE, ECE, IT, AIML students. R23 Regulation.';
+  'Access JNTUK semester-wise materials and notes for CSE, ECE, IT, AIML students. R23 Regulation.';
 const DEFAULT_KEYWORDS =
-  'JNTUK materials, JNTUK notes, PYQs, engineering notes, CSE materials, ECE materials, JNTUK library, JNTU Kakinada, R23 regulation, semester notes, previous papers, important questions';
+  'JNTUK materials, JNTUK notes, engineering notes, CSE materials, ECE materials, JNTUK library, JNTU Kakinada, R23 regulation, semester notes';
 
 export default function SEO({
   title = DEFAULT_TITLE,

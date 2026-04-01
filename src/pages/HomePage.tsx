@@ -4,7 +4,6 @@ import SEO from '../components/SEO';
 import {
   FileText,
   BookOpen,
-  HelpCircle,
   ArrowRight,
   Sparkles,
   Download,
@@ -65,28 +64,12 @@ const fadeUp = {
 /* ─── Feature data ─── */
 const features = [
   {
-    icon: FileText,
-    title: 'Previous Papers',
-    description: 'Complete archive of PYQs from 2019–2024, organised by branch and semester.',
-    color: '#6366f1',
-    bgColor: 'rgba(99,102,241,0.08)',
-    borderColor: 'rgba(99,102,241,0.15)',
-  },
-  {
     icon: BookOpen,
     title: 'Notes & Materials',
     description: 'Unit-wise notes, lab manuals, and reference materials for every subject.',
     color: '#0ea5e9',
     bgColor: 'rgba(14,165,233,0.08)',
     borderColor: 'rgba(14,165,233,0.15)',
-  },
-  {
-    icon: HelpCircle,
-    title: 'Important Questions',
-    description: 'Curated sets of high-yield questions that frequently appear in exams.',
-    color: '#f59e0b',
-    bgColor: 'rgba(245,158,11,0.08)',
-    borderColor: 'rgba(245,158,11,0.15)',
   },
 ];
 
@@ -142,8 +125,8 @@ export default function HomePage() {
   return (
     <div className="relative overflow-hidden bg-[#fafafa]">
       <SEO
-        title="JNTUK Materials | All Semesters Notes & PYQs"
-        description="Access JNTUK semester-wise materials, PYQs, notes, and important questions for CSE, ECE, IT, AIML students. R23 Regulation. Free download."
+        title="JNTUK Materials | All Semesters Notes"
+        description="Access JNTUK semester-wise materials and notes for CSE, ECE, IT, AIML students. R23 Regulation. Free download."
         canonicalUrl="/"
       />
       {/* ═══════════════════════════════════════════
@@ -224,7 +207,7 @@ export default function HomePage() {
                 variants={fadeUp}
                 className="text-[15px] sm:text-lg lg:text-xl text-slate-500 leading-relaxed max-w-lg font-medium mb-6 sm:mb-7"
               >
-                Access semester-wise materials, PYQs, and important questions instantly.
+                Access semester-wise materials and notes instantly.
               </motion.p>
 
               {/* CTAs */}
@@ -646,7 +629,7 @@ export default function HomePage() {
               {
                 step: '03',
                 title: 'Download',
-                desc: 'Access notes, PYQs, and important questions — download instantly.',
+                desc: 'Access notes and materials — download instantly.',
                 color: '#10b981',
               },
             ].map((item) => (

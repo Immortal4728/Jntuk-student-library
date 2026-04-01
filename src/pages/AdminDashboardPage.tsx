@@ -1,136 +1,136 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
-  LayoutDashboard, Users, BookOpen, Upload, LogOut, Trash2,
-  CheckCircle, AlertCircle, Loader2, FileUp, Search, Shield,
-  UserX, UserCheck, ChevronRight, Eye, Download, X
+  LayoutDashboard, Users, BookOpen, LogOut, Trash2,
+  Shield, Eye, Settings, Server, Database, Activity,
+  ChevronRight, AlertTriangle, RefreshCcw, X, Loader2
 } from "lucide-react";
-import { db, storage } from "../lib/firebase";
-import {
-  collection, addDoc, getDocs, deleteDoc, doc, updateDoc,
-  serverTimestamp
-} from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { subjectsData, commonFirstYear } from "../lib/data";
-import { normalizeSemester } from "../lib/utils";
-import "./AdminDashboardPage.css";
-
-// ─── Constants ───
-const BRANCHES = ["CSE", "ECE", "IT", "AIML"];
-const SEMESTERS = ["1-1", "1-2", "2-1", "2-2", "3-1", "3-2", "4-1", "4-2"];
-const TYPES = [
-  { id: "unit-1", label: "Unit 1" },
-  { id: "unit-2", label: "Unit 2" },
-  { id: "unit-3", label: "Unit 3" },
-  { id: "unit-4", label: "Unit 4" },
-  { id: "unit-5", label: "Unit 5" },
-  { id: "prev-papers", label: "PYQ" },
-  { id: "important-qs", label: "Important Qs" },
-];
+import { db } from "../lib/firebase";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { materials } from "../data/materials";
+import { normalizeSemester, getDisplaySemester } from "../lib/utils";
 
 const NAV = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "users", label: "Users", icon: Users },
   { id: "materials", label: "Materials", icon: BookOpen },
-  { id: "upload", label: "Upload", icon: Upload },
+  { id: "settings", label: "Settings", icon: Settings },
 ];
 
-function getSubjects(branch: string, semester: string): string[] {
-  if (semester.startsWith("1-")) return commonFirstYear[semester] || [];
-  return subjectsData[branch]?.[semester] || [];
-}
-
-// ═══════════════════════════════════════════════════════════════
-// MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════════
 export default function AdminDashboardPage() {
   const { user, signOut, isAdmin } = useAuth();
   const [tab, setTab] = useState("dashboard");
-  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
-  const [globalSearch, setGlobalSearch] = useState("");
-
-  const flash = (msg: string, ok = true) => {
-    setToast({ msg, ok });
-    setTimeout(() => setToast(null), 3500);
-  };
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   if (!isAdmin) {
     return (
-      <div className="admin-denied">
-        <div className="admin-denied-inner">
-          <Shield />
-          <h2>Access Denied</h2>
-          <p>Admin privileges required.</p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-800 p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center max-w-sm w-full text-center">
+          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4">
+            <Shield size={32} />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Access Denied</h2>
+          <p className="text-slate-500 text-sm">You do not have administrative privileges to view this control center.</p>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="mt-6 w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg transition-colors"
+          >
+            Return Home
+          </button>
         </div>
       </div>
     );
   }
 
-  const initials = (user?.email || "A").charAt(0).toUpperCase();
-
   return (
-    <div className="admin-root">
-      {/* ─── SIDEBAR ─── */}
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-brand">
-          <h1>JNTUK Admin</h1>
-          <p>Control Center</p>
+    <div className="min-h-screen bg-[#f8fafc] flex font-sans selection:bg-slate-900 selection:text-white">
+      {/* SIDEBAR */}
+      <aside className="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col flex-shrink-0 relative z-10">
+        <div className="p-6">
+          <h1 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <div className="w-6 h-6 bg-slate-900 text-white rounded-md flex items-center justify-center">
+              <Shield size={14} />
+            </div>
+            Admin Center
+          </h1>
+          <p className="text-xs font-semibold text-slate-400 mt-1 uppercase tracking-wider">Control Panel</p>
         </div>
 
-        <nav className="admin-nav">
-          {NAV.map(item => (
-            <button
-              key={item.id}
-              onClick={() => setTab(item.id)}
-              className={`admin-nav-item ${tab === item.id ? "active" : ""}`}
-            >
-              <item.icon /> {item.label}
-            </button>
-          ))}
+        <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto">
+          {NAV.map(item => {
+            const Icon = item.icon;
+            const active = tab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setTab(item.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  active 
+                    ? "bg-slate-900 text-white shadow-sm" 
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                <Icon size={18} />
+                {item.label}
+              </button>
+            );
+          })}
         </nav>
 
-        <div className="admin-sidebar-footer">
-          <p className="admin-sidebar-email">{user?.email}</p>
-          <button onClick={signOut} className="admin-signout-btn">
-            <LogOut style={{ width: 13, height: 13 }} /> Sign Out
-          </button>
+        <div className="p-4 border-t border-slate-100">
+          <div className="px-3 py-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+            <div className="truncate pr-2">
+              <p className="text-xs font-bold text-slate-900 truncate">{user?.email}</p>
+              <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Administrator</p>
+            </div>
+            <button 
+              onClick={signOut}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-red-500 hover:border-red-200 transition-colors shrink-0"
+              title="Sign Out"
+            >
+              <LogOut size={14} />
+            </button>
+          </div>
         </div>
       </aside>
 
-      {/* ─── MAIN ─── */}
-      <main className="admin-main">
-        {/* Header */}
-        <div className="admin-header">
-          <h2 className="admin-header-title">
-            {NAV.find(n => n.id === tab)?.label}
-          </h2>
-          <div className="admin-header-right">
-            <div className="admin-search-box">
-              <Search />
-              <input
-                type="text"
-                value={globalSearch}
-                onChange={e => setGlobalSearch(e.target.value)}
-                placeholder="Search anything..."
-              />
-            </div>
-            <div className="admin-avatar">{initials}</div>
-          </div>
+      {/* MAIN CONTENT */}
+      <main className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto">
+        {/* Mobile Header */}
+        <div className="md:hidden bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between sticky top-0 z-20">
+           <h1 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <Shield size={16} className="text-slate-900" />
+            Admin Center
+          </h1>
+          <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 text-slate-600">
+            <LayoutDashboard size={20} />
+          </button>
         </div>
 
-        {/* Toast */}
-        {toast && (
-          <div className={`admin-toast ${toast.ok ? "ok" : "err"}`}>
-            {toast.ok ? <CheckCircle style={{ width: 16, height: 16 }} /> : <AlertCircle style={{ width: 16, height: 16 }} />}
-            {toast.msg}
+        {isSidebarOpen && (
+          <div className="md:hidden bg-white border-b border-slate-200 px-4 py-2 flex flex-wrap gap-2 shadow-sm relative z-10 w-full animate-in slide-in-from-top-2">
+            {NAV.map(item => (
+              <button
+                key={item.id}
+                onClick={() => { setTab(item.id); setSidebarOpen(false); }}
+                className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                  tab === item.id 
+                    ? "bg-slate-900 text-white" 
+                    : "bg-slate-50 text-slate-600 border border-slate-200"
+                }`}
+              >
+                <item.icon size={14} />
+                {item.label}
+              </button>
+            ))}
           </div>
         )}
 
-        <div className="admin-content">
-          {tab === "dashboard" && <DashboardTab />}
-          {tab === "users" && <UsersTab flash={flash} globalSearch={globalSearch} />}
-          {tab === "materials" && <MaterialsTab flash={flash} globalSearch={globalSearch} />}
-          {tab === "upload" && <UploadTab flash={flash} />}
+        <div className="p-5 md:p-10 max-w-6xl mx-auto w-full">
+          {tab === "dashboard" && <DashboardTab setTab={setTab} />}
+          {tab === "users" && <UsersTab />}
+          {tab === "materials" && <MaterialsTab />}
+          {tab === "settings" && <SettingsTab />}
         </div>
       </main>
     </div>
@@ -138,120 +138,131 @@ export default function AdminDashboardPage() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PAGE 1: DASHBOARD
+// DASHBOARD
 // ═══════════════════════════════════════════════════════════════
-function DashboardTab() {
-  const [stats, setStats] = useState({ users: 0, materials: 0, backlogs: 0, downloads: 0 });
-  const [loading, setLoading] = useState(true);
-  const [branchCounts, setBranchCounts] = useState<Record<string, number>>({});
-  const [semCounts, setSemCounts] = useState<Record<string, number>>({});
+function DashboardTab({ setTab }: { setTab: (t: string) => void }) {
+  const [usersCount, setUsersCount] = useState<number | null>(null);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const [uSnap, mSnap] = await Promise.all([
-          getDocs(collection(db, "users")),
-          getDocs(collection(db, "materials")),
-        ]);
-
-        let backlogCount = 0;
-        const bc: Record<string, number> = {};
-        uSnap.docs.forEach(d => {
-          const data = d.data();
-          if (data.backlogs && Array.isArray(data.backlogs)) {
-            backlogCount += data.backlogs.length;
-          }
-          const branch = data.branch || "Other";
-          bc[branch] = (bc[branch] || 0) + 1;
-        });
-
-        const sc: Record<string, number> = {};
-        mSnap.docs.forEach(d => {
-          const data = d.data();
-          const sem = normalizeSemester(data.semester) || "?";
-          sc[sem] = (sc[sem] || 0) + 1;
-        });
-
-        setStats({ users: uSnap.size, materials: mSnap.size, backlogs: backlogCount, downloads: 0 });
-        setBranchCounts(bc);
-        setSemCounts(sc);
-      } catch { /* silent */ }
-      setLoading(false);
-    })();
+    getDocs(collection(db, "users")).then(snap => setUsersCount(snap.size)).catch(() => setUsersCount(0));
   }, []);
 
-  const cards = [
-    { label: "Total Users", value: stats.users, color: "blue", icon: Users },
-    { label: "Total Materials", value: stats.materials, color: "indigo", icon: BookOpen },
-    { label: "Downloads", value: stats.downloads, color: "emerald", icon: Download },
-    { label: "Total Backlogs", value: stats.backlogs, color: "amber", icon: AlertCircle },
-  ];
-
-  if (loading) {
-    return <div className="admin-loading"><Loader2 style={{ width: 24, height: 24 }} /></div>;
-  }
-
-  const maxBranch = Math.max(...Object.values(branchCounts), 1);
-  const maxSem = Math.max(...Object.values(semCounts), 1);
-
   return (
-    <div>
-      {/* Stat Cards */}
-      <div className="admin-stats-grid">
-        {cards.map(c => (
-          <div key={c.label} className={`admin-stat-card ${c.color}`}>
-            <div className={`admin-stat-icon ${c.color}`}>
-              <c.icon style={{ width: 20, height: 20 }} />
-            </div>
-            <p className="admin-stat-value">{c.value}</p>
-            <p className="admin-stat-label">{c.label}</p>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <header>
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Admin Control Center</h1>
+        <p className="text-slate-500 text-sm md:text-base font-medium mt-1">Manage system and users efficiently</p>
+      </header>
+
+      {/* CORE STATS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+            <Users size={20} />
           </div>
-        ))}
+          <p className="text-[11px] font-bold text-slate-400 tracking-widest uppercase mb-1">Total Users</p>
+          <h2 className="text-3xl font-black text-slate-900">{usersCount === null ? "-" : usersCount}</h2>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
+            <Server size={20} />
+          </div>
+          <p className="text-[11px] font-bold text-slate-400 tracking-widest uppercase mb-1">Branches Available</p>
+          <h2 className="text-3xl font-black text-slate-900">1</h2>
+          <p className="text-xs font-semibold text-slate-400 mt-2">Currently serving CSE only</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+            <Activity size={20} />
+          </div>
+          <p className="text-[11px] font-bold text-slate-400 tracking-widest uppercase mb-1">System Health</p>
+          <h2 className="text-xl font-bold text-emerald-600 flex items-center gap-2 mt-1">
+            <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+            Online & Stable
+          </h2>
+        </div>
       </div>
 
-      {/* Charts */}
-      <div className="admin-charts-grid">
-        {/* Users per Branch */}
-        <div className="admin-chart-card">
-          <h3 className="admin-chart-title">Users by Branch</h3>
-          <div className="admin-bar-chart">
-            {BRANCHES.map((b, i) => {
-              const count = branchCounts[b] || 0;
-              const pct = Math.max((count / maxBranch) * 100, count > 0 ? 8 : 0);
-              const colors = ["blue", "indigo", "emerald", "amber"];
-              return (
-                <div key={b} className="admin-bar-row">
-                  <span className="admin-bar-label">{b}</span>
-                  <div className="admin-bar-track">
-                    <div className={`admin-bar-fill ${colors[i % 4]}`} style={{ width: `${pct}%` }}>
-                      {count}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* QUICK ACTIONS */}
+        <div className="lg:col-span-2 space-y-4">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <LayoutDashboard size={16} className="text-slate-400" />
+            Quick Actions
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button onClick={() => setTab("materials")} className="flex items-center gap-4 bg-white border border-slate-200 p-4 rounded-xl hover:border-slate-300 hover:shadow-sm transition-all text-left group">
+              <div className="w-10 h-10 rounded-lg bg-slate-50 text-slate-600 flex items-center justify-center group-hover:bg-slate-100 transition-colors">
+                <BookOpen size={18} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-900">Materials Overview</h4>
+                <p className="text-xs font-medium text-slate-500 mt-0.5">View content status</p>
+              </div>
+            </button>
+            
+            <button onClick={() => setTab("users")} className="flex items-center gap-4 bg-white border border-slate-200 p-4 rounded-xl hover:border-slate-300 hover:shadow-sm transition-all text-left group">
+              <div className="w-10 h-10 rounded-lg bg-slate-50 text-slate-600 flex items-center justify-center group-hover:bg-slate-100 transition-colors">
+                <Users size={18} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-900">Manage Users</h4>
+                <p className="text-xs font-medium text-slate-500 mt-0.5">Control access & accounts</p>
+              </div>
+            </button>
+            
+            <button onClick={() => setTab("settings")} className="flex items-center gap-4 bg-white border border-slate-200 p-4 rounded-xl hover:border-slate-300 hover:shadow-sm transition-all text-left group">
+              <div className="w-10 h-10 rounded-lg bg-slate-50 text-slate-600 flex items-center justify-center group-hover:bg-slate-100 transition-colors">
+                <Settings size={18} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-900">System Parameters</h4>
+                <p className="text-xs font-medium text-slate-500 mt-0.5">Update core settings</p>
+              </div>
+            </button>
+
+            <button onClick={() => alert("Action restricted in current environment.")} className="flex items-center gap-4 bg-red-50 border border-red-100/50 p-4 rounded-xl hover:bg-red-100/50 hover:shadow-sm transition-all text-left group">
+              <div className="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center transition-colors">
+                <AlertTriangle size={18} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-red-700">Reset Data</h4>
+                <p className="text-xs font-medium text-red-600/70 mt-0.5">Clear operational cache</p>
+              </div>
+            </button>
           </div>
         </div>
 
-        {/* Materials per Semester */}
-        <div className="admin-chart-card">
-          <h3 className="admin-chart-title">Materials by Semester</h3>
-          <div className="admin-bar-chart">
-            {SEMESTERS.map((s, i) => {
-              const count = semCounts[s] || 0;
-              const pct = Math.max((count / maxSem) * 100, count > 0 ? 8 : 0);
-              const colors = ["blue", "indigo", "emerald", "amber"];
-              return (
-                <div key={s} className="admin-bar-row">
-                  <span className="admin-bar-label">{s}</span>
-                  <div className="admin-bar-track">
-                    <div className={`admin-bar-fill ${colors[i % 4]}`} style={{ width: `${pct}%` }}>
-                      {count}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+        {/* SYSTEM HEALTH CARD */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <Database size={16} className="text-slate-400" />
+            System Status
+          </h3>
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">App Version</span>
+                <span className="text-sm font-black text-slate-900">v2.1.0</span>
+              </div>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Database</span>
+                <span className="text-sm font-black text-slate-900">Connected</span>
+              </div>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Data Store</span>
+                <span className="text-sm font-black text-slate-900">materials.js</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Last Updated</span>
+                <span className="text-sm font-black text-indigo-600 flex items-center gap-1.5">
+                  <RefreshCcw size={14} />
+                  Just now
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -260,519 +271,196 @@ function DashboardTab() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PAGE 2: USERS
+// USERS SECTION (Main Focus)
 // ═══════════════════════════════════════════════════════════════
-function UsersTab({ flash, globalSearch }: { flash: (m: string, ok?: boolean) => void; globalSearch: string }) {
+function UsersTab() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [filterBranch, setFilterBranch] = useState("all");
-  const [filterSem, setFilterSem] = useState("all");
-  const [viewUser, setViewUser] = useState<any>(null);
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const snap = await getDocs(collection(db, "users"));
       setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    } catch {
-      flash("Failed to load users", false);
+    } catch (e) {
+      console.error(e);
     }
     setLoading(false);
   };
 
   useEffect(() => { fetchUsers(); }, []);
 
-  const handleToggle = async (u: any) => {
-    const newStatus = u.disabled ? false : true;
+  const handleDelete = async (userId: string) => {
+    if (!window.confirm("Permanently delete this user record form database?")) return;
     try {
-      await updateDoc(doc(db, "users", u.id), { disabled: newStatus });
-      flash(newStatus ? "User disabled" : "User enabled");
-      fetchUsers();
-    } catch {
-      flash("Action failed", false);
+      await deleteDoc(doc(db, "users", userId));
+      setUsers(prev => prev.filter(u => u.id !== userId));
+    } catch (err) {
+      alert("Failed to delete user");
     }
   };
-
-  const handleDelete = async (u: any) => {
-    if (!confirm(`Delete user "${u.name || u.id}"? This cannot be undone.`)) return;
-    try {
-      await deleteDoc(doc(db, "users", u.id));
-      flash("User deleted");
-      fetchUsers();
-    } catch {
-      flash("Delete failed", false);
-    }
-  };
-
-  const q = (search || globalSearch).toLowerCase();
-  const filtered = users.filter(u => {
-    if (filterBranch !== "all" && u.branch !== filterBranch) return false;
-    if (filterSem !== "all" && normalizeSemester(u.semester) !== filterSem) return false;
-    if (q) {
-      const name = (u.name || "").toLowerCase();
-      const email = (u.email || u.id || "").toLowerCase();
-      if (!name.includes(q) && !email.includes(q)) return false;
-    }
-    return true;
-  });
 
   return (
-    <div>
-      {/* User Detail Modal */}
-      {viewUser && (
-        <div className="admin-modal-backdrop" onClick={() => setViewUser(null)}>
-          <div className="admin-modal-card" onClick={e => e.stopPropagation()}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h3 className="admin-modal-title" style={{ marginBottom: 0 }}>User Details</h3>
-              <button className="admin-action-btn" onClick={() => setViewUser(null)}><X style={{ width: 18, height: 18, color: "#94a3b8" }} /></button>
-            </div>
-            <div style={{ marginTop: 16 }}>
-              {[
-                ["Name", viewUser.name || "—"],
-                ["Email", viewUser.email || viewUser.id],
-                ["Branch", viewUser.branch || "—"],
-                ["Semester", normalizeSemester(viewUser.semester) || "—"],
-                ["College", viewUser.college || "—"],
-                ["Status", viewUser.disabled ? "Disabled" : "Active"],
-                ["Backlogs", viewUser.backlogs?.length || 0],
-                ["CGPA", viewUser.cgpa ?? "—"],
-              ].map(([k, v]) => (
-                <div className="admin-modal-row" key={k as string}>
-                  <span className="admin-modal-key">{k}</span>
-                  <span className="admin-modal-val">{String(v)}</span>
-                </div>
-              ))}
-            </div>
-            <button className="admin-modal-close" onClick={() => setViewUser(null)}>Close</button>
-          </div>
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">User Directory</h1>
+          <p className="text-slate-500 text-sm font-medium mt-1">Manage accounts and monitor academic metrics.</p>
         </div>
-      )}
-
-      {/* Toolbar */}
-      <div className="admin-toolbar">
-        <div className="admin-toolbar-search">
-          <Search />
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search name or email..."
-          />
+        <div className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg border border-slate-200 inline-flex items-center">
+          {users.length} Total Records
         </div>
-        <select value={filterBranch} onChange={e => setFilterBranch(e.target.value)} className="admin-filter-select">
-          <option value="all">All Branches</option>
-          {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
-        </select>
-        <select value={filterSem} onChange={e => setFilterSem(e.target.value)} className="admin-filter-select">
-          <option value="all">All Semesters</option>
-          {SEMESTERS.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <span className="admin-count-badge">{filtered.length} users</span>
-      </div>
+      </header>
 
-      {/* Table */}
-      <div className="admin-table-wrap">
+      <div className="bg-white border flex flex-col border-slate-200 rounded-[1.5rem] shadow-sm overflow-hidden min-h-[400px]">
         {loading ? (
-          <div className="admin-loading"><Loader2 style={{ width: 24, height: 24 }} /></div>
-        ) : filtered.length === 0 ? (
-          <div className="admin-empty">No users found.</div>
+          <div className="flex items-center justify-center flex-1 p-20">
+            <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+          </div>
+        ) : users.length === 0 ? (
+          <div className="flex flex-col items-center justify-center flex-1 p-20 text-center">
+            <Users className="w-12 h-12 text-slate-300 mb-4" />
+            <h3 className="text-lg font-bold text-slate-900">No users found</h3>
+            <p className="text-sm text-slate-500 mt-1">When users sign up, they will appear here.</p>
+          </div>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Branch</th>
-                <th>Semester</th>
-                <th>Status</th>
-                <th style={{ textAlign: "right" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(u => (
-                <tr key={u.id}>
-                  <td><span style={{ fontWeight: 700, color: "#0f172a" }}>{u.name || "—"}</span></td>
-                  <td><span style={{ fontFamily: "monospace", fontSize: 12, color: "#64748b" }}>{u.email || u.id}</span></td>
-                  <td><span className="admin-badge branch">{u.branch || "—"}</span></td>
-                  <td>{normalizeSemester(u.semester) || "—"}</td>
-                  <td>
-                    {u.disabled
-                      ? <span className="admin-badge disabled">Disabled</span>
-                      : <span className="admin-badge active">Active</span>
-                    }
-                  </td>
-                  <td>
-                    <div className="admin-actions">
-                      <button className="admin-action-btn view" title="View" onClick={() => setViewUser(u)}>
-                        <Eye />
-                      </button>
-                      <button
-                        className={`admin-action-btn ${u.disabled ? "enable" : "disable"}`}
-                        title={u.disabled ? "Enable" : "Disable"}
-                        onClick={() => handleToggle(u)}
-                      >
-                        {u.disabled ? <UserCheck /> : <UserX />}
-                      </button>
-                      <button className="admin-action-btn delete" title="Delete" onClick={() => handleDelete(u)}>
-                        <Trash2 />
-                      </button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/50">
+                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Name / Email</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Branch</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap text-center">Semester</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap text-center">CGPA</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// PAGE 3: MATERIALS (Expandable Hierarchy)
-// ═══════════════════════════════════════════════════════════════
-function MaterialsTab({ flash, globalSearch }: { flash: (m: string, ok?: boolean) => void; globalSearch: string }) {
-  const [materials, setMaterials] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [filterBranch, setFilterBranch] = useState("all");
-  const [filterSem, setFilterSem] = useState("all");
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-
-  const fetchMaterials = async () => {
-    setLoading(true);
-    try {
-      const snap = await getDocs(collection(db, "materials"));
-      const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      docs.sort((a: any, b: any) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-      setMaterials(docs);
-    } catch {
-      flash("Failed to load materials", false);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchMaterials(); }, []);
-
-  const handleDelete = async (m: any) => {
-    if (!confirm(`Delete "${m.title}"?`)) return;
-    try {
-      await deleteDoc(doc(db, "materials", m.id));
-      flash("Material deleted");
-      fetchMaterials();
-    } catch {
-      flash("Delete failed", false);
-    }
-  };
-
-  const q = (search || globalSearch).toLowerCase();
-  const filtered = materials.filter(m => {
-    if (filterBranch !== "all" && m.branch !== filterBranch) return false;
-    if (filterSem !== "all" && m.semester !== filterSem) return false;
-    if (q) {
-      if (!(m.title || "").toLowerCase().includes(q) && !(m.subject || "").toLowerCase().includes(q)) return false;
-    }
-    return true;
-  });
-
-  // Group: Branch → Semester → Subject → Files
-  const grouped = useMemo(() => {
-    const map: Record<string, Record<string, Record<string, any[]>>> = {};
-    filtered.forEach(m => {
-      const b = m.branch || "Other";
-      const s = normalizeSemester(m.semester) || "?";
-      const sub = m.subject || "General";
-      if (!map[b]) map[b] = {};
-      if (!map[b][s]) map[b][s] = {};
-      if (!map[b][s][sub]) map[b][s][sub] = [];
-      map[b][s][sub].push(m);
-    });
-    return map;
-  }, [filtered]);
-
-  const toggle = (key: string) => {
-    setExpanded(prev => {
-      const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
-      return next;
-    });
-  };
-
-  return (
-    <div>
-      {/* Toolbar */}
-      <div className="admin-toolbar">
-        <div className="admin-toolbar-search">
-          <Search />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search title or subject..." />
-        </div>
-        <select value={filterBranch} onChange={e => setFilterBranch(e.target.value)} className="admin-filter-select">
-          <option value="all">All Branches</option>
-          {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
-        </select>
-        <select value={filterSem} onChange={e => setFilterSem(e.target.value)} className="admin-filter-select">
-          <option value="all">All Semesters</option>
-          {SEMESTERS.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <span className="admin-count-badge">{filtered.length} items</span>
-      </div>
-
-      {loading ? (
-        <div className="admin-loading"><Loader2 style={{ width: 24, height: 24 }} /></div>
-      ) : Object.keys(grouped).length === 0 ? (
-        <div className="admin-table-wrap"><div className="admin-empty">No materials found.</div></div>
-      ) : (
-        Object.entries(grouped).map(([branch, sems]) => (
-          <div key={branch} className="admin-hierarchy-group">
-            <button className="admin-hierarchy-header" onClick={() => toggle(branch)}>
-              <ChevronRight className={`admin-hierarchy-chevron ${expanded.has(branch) ? "open" : ""}`} />
-              <span className="admin-hierarchy-header-text">{branch}</span>
-              <span className="admin-hierarchy-count">
-                {Object.values(sems).reduce((t, subMap) => t + Object.values(subMap).reduce((s, arr) => s + arr.length, 0), 0)} files
-              </span>
-            </button>
-            {expanded.has(branch) && (
-              <div className="admin-hierarchy-items">
-                {Object.entries(sems).sort(([a],[b]) => a.localeCompare(b)).map(([sem, subjects]) => (
-                  <div key={sem}>
-                    <div style={{ padding: "8px 20px 4px 48px" }}>
-                      <span style={{ fontSize: 11, fontWeight: 800, color: "#818cf8", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>
-                        Semester {sem}
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-sm">
+                {users.map(u => (
+                  <tr key={u.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-6 py-4">
+                      <p className="font-bold text-slate-900 truncate max-w-[180px]">{u.name || "Anonymous User"}</p>
+                      <p className="font-medium text-slate-500 text-xs truncate max-w-[180px] mt-0.5">{u.email || u.id}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="px-2.5 py-1 rounded-[6px] bg-slate-100 text-[11px] font-bold text-slate-600 border border-slate-200">
+                        {u.branch || "CSE"}
                       </span>
-                    </div>
-                    {Object.entries(subjects).map(([subject, files]) => (
-                      <div key={subject}>
-                        <div style={{ padding: "6px 20px 2px 64px" }}>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>{subject}</span>
-                          <span style={{ fontSize: 10, color: "#94a3b8", marginLeft: 8 }}>({files.length})</span>
-                        </div>
-                        {files.map((m: any) => (
-                          <div key={m.id} className="admin-hierarchy-item" style={{ paddingLeft: 80 }}>
-                            <div>
-                              <span className="admin-hierarchy-item-name">{m.title}</span>
-                              <span className="admin-hierarchy-item-meta" style={{ marginLeft: 10 }}>
-                                {TYPES.find(t => t.id === m.unit)?.label || m.unit}
-                              </span>
-                            </div>
-                            <button className="admin-action-btn delete" onClick={() => handleDelete(m)}>
-                              <Trash2 />
-                            </button>
-                          </div>
-                        ))}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="font-bold text-slate-700">{getDisplaySemester(u.semester)}</span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="font-black text-slate-900 flex items-center justify-center gap-1.5">
+                        {u.cgpa ? (
+                          <>
+                            {Number(u.cgpa).toFixed(2)}
+                            {Number(u.cgpa) > 8 && <span className="text-orange-500 text-[10px]">🔥</span>}
+                          </>
+                        ) : (
+                          <span className="text-slate-300 font-medium">—</span>
+                        )}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => alert(`Profile Viewer: \nName: ${u.name}\nEmail: ${u.email}\nBranch: ${u.branch}\nID: ${u.id}`)}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 shadow-sm transition-all"
+                          title="View Profile"
+                        >
+                          <Eye size={14} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(u.id)}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 shadow-sm transition-all"
+                          title="Delete User"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
-                    ))}
-                  </div>
+                      <span className="text-xs font-bold text-slate-400 group-hover:hidden">—</span>
+                    </td>
+                  </tr>
                 ))}
-              </div>
-            )}
+              </tbody>
+            </table>
           </div>
-        ))
-      )}
+        )}
+      </div>
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PAGE 4: UPLOAD
+// MATERIALS SECTION (Read Only Overview)
 // ═══════════════════════════════════════════════════════════════
-function UploadTab({ flash }: { flash: (m: string, ok?: boolean) => void }) {
-  const titleRef = useRef<HTMLInputElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const [branch, setBranch] = useState(localStorage.getItem("adm_b") || "CSE");
-  const [semester, setSemester] = useState(localStorage.getItem("adm_s") || "3-2");
-  const [subject, setSubject] = useState("");
-  const [type, setType] = useState("unit-1");
-  const [title, setTitle] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [recents, setRecents] = useState<any[]>([]);
-
-  const subjects = getSubjects(branch, semester);
-
-  useEffect(() => {
-    localStorage.setItem("adm_b", branch);
-    localStorage.setItem("adm_s", semester);
-    const list = getSubjects(branch, semester);
-    if (list.length > 0 && !list.includes(subject)) setSubject(list[0]);
-  }, [branch, semester]);
-
-  useEffect(() => { loadRecents(); }, []);
-
-  const loadRecents = async () => {
-    try {
-      const snap = await getDocs(collection(db, "materials"));
-      const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      docs.sort((a: any, b: any) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-      setRecents(docs.slice(0, 8));
-    } catch { /* silent */ }
-  };
-
-  const handleUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file || !title.trim() || !subject) return;
-    setUploading(true);
-    setProgress(0);
-
-    try {
-      const ext = file.name.split(".").pop();
-      const fname = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-      const storageRef = ref(storage, `materials/${branch}/${semester}/${fname}`);
-      const task = uploadBytesResumable(storageRef, file);
-
-      task.on("state_changed",
-        snap => setProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),
-        () => { flash("Upload failed", false); setUploading(false); },
-        async () => {
-          const url = await getDownloadURL(task.snapshot.ref);
-          await addDoc(collection(db, "materials"), {
-            title: title.trim(), branch, semester, subject,
-            unit: type, fileURL: url, fileName: file.name,
-            createdAt: serverTimestamp(),
-          });
-          flash(`"${title.trim()}" uploaded successfully`);
-          setTitle("");
-          setFile(null);
-          if (fileRef.current) fileRef.current.value = "";
-          setUploading(false);
-          loadRecents();
-          setTimeout(() => titleRef.current?.focus(), 100);
-        }
-      );
-    } catch {
-      flash("Upload failed", false);
-      setUploading(false);
-    }
-  };
-
-  const handleDeleteRecent = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, "materials", id));
-      flash("Deleted");
-      loadRecents();
-    } catch {
-      flash("Delete failed", false);
-    }
-  };
+function MaterialsTab() {
+  const semestersData = Object.keys(materials);
 
   return (
-    <div>
-      <form onSubmit={handleUpload} className="admin-upload-card">
-        {/* Branch + Semester */}
-        <div className="admin-upload-grid" style={{ marginBottom: 18 }}>
-          <div>
-            <label className="admin-field-label">Branch</label>
-            <select value={branch} onChange={e => setBranch(e.target.value)} className="admin-input" style={{ cursor: "pointer" }}>
-              {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
-            </select>
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <header>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Content Status</h1>
+        <p className="text-slate-500 text-sm font-medium mt-1">System wide verification of loaded academic material files.</p>
+      </header>
+      
+      <div className="bg-white border border-slate-200 rounded-[1.5rem] p-6 shadow-sm">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+            <Server size={22} />
           </div>
           <div>
-            <label className="admin-field-label">Semester</label>
-            <select value={semester} onChange={e => setSemester(e.target.value)} className="admin-input" style={{ cursor: "pointer" }}>
-              {SEMESTERS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">CSE Repository</h2>
+            <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-0.5">Online & Active</p>
           </div>
         </div>
 
-        {/* Subject */}
-        <div className="admin-field">
-          <label className="admin-field-label">Subject</label>
-          {subjects.length === 0 ? (
-            <div className="admin-alert-warn">No subjects for {branch} {semester}</div>
-          ) : (
-            <select value={subject} onChange={e => setSubject(e.target.value)} className="admin-input" style={{ cursor: "pointer" }}>
-              {subjects.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          )}
-        </div>
-
-        {/* Type */}
-        <div className="admin-field">
-          <label className="admin-field-label">Type</label>
-          <div className="admin-type-pills">
-            {TYPES.map(t => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setType(t.id)}
-                className={`admin-type-pill ${type === t.id ? "active" : ""}`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Title */}
-        <div className="admin-field">
-          <label className="admin-field-label">Title</label>
-          <input
-            ref={titleRef}
-            type="text"
-            required
-            autoFocus
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            placeholder="e.g. Unit 1 Complete Notes"
-            className="admin-input"
-            style={{ height: 46, fontSize: 15 }}
-          />
-        </div>
-
-        {/* File */}
-        <div className="admin-field">
-          <label className="admin-field-label">File</label>
-          <div className={`admin-dropzone ${file ? "has-file" : ""}`}>
-            <input ref={fileRef} type="file" required onChange={e => setFile(e.target.files?.[0] || null)} />
-            <FileUp style={{ width: 20, height: 20, color: file ? "#10b981" : "#94a3b8" }} />
-            <span className="admin-dropzone-text" style={{ color: file ? "#065f46" : "#64748b" }}>
-              {file ? file.name : "Click to attach file"}
-            </span>
-          </div>
-        </div>
-
-        {/* Progress */}
-        {uploading && (
-          <div className="admin-field">
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-              <span className="admin-field-label" style={{ marginBottom: 0 }}>Uploading</span>
-              <span className="admin-field-label" style={{ marginBottom: 0 }}>{progress}%</span>
-            </div>
-            <div className="admin-progress-bar">
-              <div className="admin-progress-fill" style={{ width: `${progress}%` }} />
-            </div>
-          </div>
-        )}
-
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={uploading || !file || !title.trim() || !subject}
-          className="admin-submit-btn"
-        >
-          {uploading ? <><Loader2 style={{ width: 16, height: 16, animation: "spin 1s linear infinite" }} /> Uploading...</> : "Upload Material"}
-        </button>
-      </form>
-
-      {/* Recent uploads */}
-      {recents.length > 0 && (
-        <div className="admin-recents">
-          <h3 className="admin-recents-title">Recent Uploads</h3>
-          {recents.map((m: any) => (
-            <div key={m.id} className="admin-recent-item">
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <p className="admin-recent-item-title">{m.title}</p>
-                <p className="admin-recent-item-meta">{m.subject} · {m.branch} {normalizeSemester(m.semester)}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {semestersData.map(semLabel => {
+            const hasData = Object.keys((materials as any)[semLabel] || {}).length > 0;
+            return (
+              <div key={semLabel} className="p-4 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between">
+                <span className="font-bold text-slate-800">{semLabel} Semester</span>
+                {hasData ? (
+                  <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded uppercase tracking-wider">Available</span>
+                ) : (
+                  <span className="text-[10px] font-bold bg-slate-200 text-slate-500 px-2 py-0.5 rounded uppercase tracking-wider">Empty</span>
+                )}
               </div>
-              <button className="admin-action-btn delete" onClick={() => handleDeleteRecent(m.id)} style={{ opacity: 1, flexShrink: 0 }}>
-                <Trash2 />
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
-      )}
+        
+        <div className="mt-8 pt-6 border-t border-slate-100">
+          <p className="text-xs font-medium text-slate-400 flex items-center gap-2">
+            <AlertTriangle size={14} className="text-amber-500" />
+            Upload interface is disabled. Materials are hardcoded securely in the datastore logic.
+          </p>
+        </div>
+      </div>
     </div>
   );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════════════
+function SettingsTab() {
+  return (
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <header>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">System Settings</h1>
+        <p className="text-slate-500 text-sm font-medium mt-1">Configure parameters and core logic.</p>
+      </header>
+
+      <div className="bg-white border border-slate-200 rounded-[1.5rem] p-10 shadow-sm flex flex-col items-center justify-center text-center">
+        <Settings className="w-12 h-12 text-slate-300 mb-4" />
+        <h3 className="text-lg font-bold text-slate-900 tracking-tight">Configuration Locked</h3>
+        <p className="text-sm text-slate-500 mt-2 max-w-sm mx-auto">
+          Dynamic configurations are disabled in the current build environment to maintain stability.
+        </p>
+      </div>
+    </div>
+  )
 }
