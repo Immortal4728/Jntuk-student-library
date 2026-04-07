@@ -90,18 +90,17 @@ export function formatGpa(n: number): string {
 // ─── Percentage from CGPA (full precision for logic) ───
 export function cgpaToPercentage(cgpa: number): number {
   if (cgpa <= 0) return 0;
-  return cgpa * 9.5;
+  return (cgpa - 0.5) * 10;
 }
 
 // ─── Class from CGPA ───
 export function getClass(cgpa: number): string {
-  if (cgpa >= 9.5) return "Distinction ★";
-  if (cgpa >= 8.5) return "Distinction";
-  if (cgpa >= 7.5) return "First Class";
-  if (cgpa >= 6.5) return "Second Class";
-  if (cgpa >= 5.5) return "Third Class";
-  if (cgpa > 0) return "Pass";
-  return "—";
+  if (cgpa <= 0) return "—";
+  if (cgpa >= 7.5) return "First Class with Distinction";
+  else if (cgpa >= 6.5) return "First Class";
+  else if (cgpa >= 5.5) return "Second Class";
+  else if (cgpa >= 5.0) return "Pass Class";
+  else return "Fail";
 }
 
 // ─── Total backlogs across all semesters ───

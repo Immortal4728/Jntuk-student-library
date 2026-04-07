@@ -11,7 +11,7 @@ import {
   User,
   signOut as firebaseSignOut,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { normalizeSemester } from "../lib/utils";
 
@@ -109,8 +109,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
         await setDoc(userDocRef, {
           uid: currentUser.uid,
+          email: currentUser.email,
           ...newProfile,
-          createdAt: new Date().toISOString(),
+          createdAt: serverTimestamp(),
         });
         setProfile(newProfile);
       }

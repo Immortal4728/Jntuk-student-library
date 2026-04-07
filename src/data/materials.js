@@ -145,5 +145,44 @@ export const materials = {
       "Unit 4": "https://drive.google.com/uc?export=download&id=1xOBElAfjH4Jzw-kyzyf2RyvaePlO_S8L",
       "Unit 5": "https://drive.google.com/uc?export=download&id=1UGo1T_MqNiXIX7ByPU2ME9hXCOurr_qh"
     }
+  },
+  "3-2": {
+    "Cryptography and Network Security": {
+      "Unit 1": "https://drive.google.com/uc?export=download&id=1289aJZZd6f06eFFVoqunt8RsL-_c2Vij",
+      "Unit 2": "https://drive.google.com/uc?export=download&id=1TMRyefapn5Vz5QJCnoI_gXIH4Rx6JLw1",
+      "Unit 3": "https://drive.google.com/uc?export=download&id=1uIFh0v2wFqlLgz70W1tJ1HXTa7b0YbMU",
+      "Unit 4": "https://drive.google.com/uc?export=download&id=1ICrfIJw0WHe2CB7JasVC_oN_fWkNQ27D",
+      "Unit 5": "https://drive.google.com/uc?export=download&id=1zY4qfXuxWNPkD8Vfo2nENI9zlq-vcIQk"
+    },
+    "Software Project Management": {
+      "Unit 1": "https://drive.google.com/uc?export=download&id=1cwm2pdHFagzGjFrPttheW9sQRJS-aEqA",
+      "Unit 2": "https://drive.google.com/uc?export=download&id=1jn6DDhBqMwsCRydfS-z00JB9V8IAPQFk",
+      "Unit 3": "https://drive.google.com/uc?export=download&id=1rVRjv_fbvdc-dM5E3S6-57MFyOUhf6RN",
+      "Unit 4": "https://drive.google.com/uc?export=download&id=1BjbhtuwdjJTVH-X9zCqhAFO1CJPZgnvs",
+      "Unit 5 - Part 1": "https://drive.google.com/uc?export=download&id=1GeqVIxnX7n4UVfH9Nv0SS3ldhcM66K39",
+      "Unit 5 - Part 2": "https://drive.google.com/uc?export=download&id=1DX1AfvhA7LFJ4LYA083cjAIMnc3wV_JI"
+    },
+    "MPMC": {
+      "Unit 1": "https://drive.google.com/uc?export=download&id=1e2GbDakEa0FgJupF49XskXX2TTW4Dwue",
+      "Unit 2": "https://drive.google.com/uc?export=download&id=1k7yu9fRYqXaGhlrhGIHwO6TtNc-ecC8r",
+      "Unit 3": "https://drive.google.com/uc?export=download&id=1AbW3H9fDgNoRkRBheKpAXuKC9UTzDavI",
+      "Unit 4": "https://drive.google.com/uc?export=download&id=16HT01PXFf_hLyoICnQmmZdNGh2fQcaYa",
+      "Unit 5": "https://docs.google.com/document/d/18UWizEwlL4-NnME82vJWlsR0afuTDYom/export?format=pdf"
+    },
+    "Compiler Design": {
+      "Unit 1": "https://docs.google.com/document/d/13dOdtn0oIkAxrZAAzsrlyk2C_rSkmceZ/export?format=pdf",
+      "Unit 2": "https://docs.google.com/document/d/1fQuZBdfJbqmeWuDb2jgogbjBarzUQGgd/export?format=pdf",
+      "Unit 3": "https://docs.google.com/document/d/13thMtyWlTFAr8pBbF0siUBjC5ijuxeQM/export?format=pdf",
+      "Unit 4": "https://docs.google.com/document/d/1DqRLP-EckpfC_b0D6__Vod9NodlGY95l/export?format=pdf",
+      "Unit 5": "https://docs.google.com/document/d/10deQ7EgtjhzS_WAvca0MggpM6alnaAVA/export?format=pdf"
+    },
+    "Cloud Computing": {
+      "Unit 1": "https://drive.google.com/uc?export=download&id=1inOtvn9f8riazcZKlW8886Iz7rUINhtG",
+      "Unit 2": "https://drive.google.com/uc?export=download&id=1g48Cm6uqh6p84X3vtVqEht7MZgnrTMyI",
+      "Unit 3": "https://drive.google.com/uc?export=download&id=1R2gYm39xHB0bqdINej-WGc4ISk_vxU1a",
+      "Unit 4": "https://drive.google.com/uc?export=download&id=14i823dqf6CixbqzGBYQUScne12aIDNlj",
+      "Unit 5": "https://drive.google.com/uc?export=download&id=1U75DFaC1lvfJl0P8-WQoZEridF8rrgwc"
+    },
+    "Machine Learning": {}
   }
 };

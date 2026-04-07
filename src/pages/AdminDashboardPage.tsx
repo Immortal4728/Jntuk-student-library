@@ -6,7 +6,7 @@ import {
   AlertTriangle, RefreshCcw, Loader2
 } from "lucide-react";
 import { db } from "../lib/firebase";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 import { materials } from "../data/materials";
 import { getDisplaySemester } from "../lib/utils";
 
@@ -277,18 +277,32 @@ function UsersTab() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchUsers = async () => {
+  useEffect(() => {
     setLoading(true);
-    try {
-      const snap = await getDocs(collection(db, "users"));
-      setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    } catch (e) {
-      console.error(e);
-    }
-    setLoading(false);
-  };
+    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+      const usersList = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      console.log("Fetched users:", usersList);
+      
+      // Sort latest users first
+      usersList.sort((a: any, b: any) => {
+        const timeA = a.createdAt?.seconds || 0;
+        const timeB = b.createdAt?.seconds || 0;
+        return timeB - timeA;
+      });
+      
+      setUsers(usersList);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching users realtime:", error);
+      setLoading(false);
+    });
 
-  useEffect(() => { fetchUsers(); }, []);
+    return () => unsubscribe();
+  }, []);
 
   const handleDelete = async (userId: string) => {
     if (!window.confirm("Permanently delete this user record form database?")) return;
@@ -308,7 +322,7 @@ function UsersTab() {
           <p className="text-slate-500 text-sm font-medium mt-1">Manage accounts and monitor academic metrics.</p>
         </div>
         <div className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg border border-slate-200 inline-flex items-center">
-          {users.length} Total Records
+          Total Users: {users.length}
         </div>
       </header>
 
@@ -328,6 +342,7 @@ function UsersTab() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50">
+                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">S.No</th>
                   <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Name / Email</th>
                   <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Branch</th>
                   <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap text-center">Semester</th>
@@ -336,8 +351,11 @@ function UsersTab() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
-                {users.map(u => (
+                {users.map((u, index) => (
                   <tr key={u.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-6 py-4 text-xs font-bold text-slate-400">
+                      {index + 1}
+                    </td>
                     <td className="px-6 py-4">
                       <p className="font-bold text-slate-900 truncate max-w-[180px]">{u.name || "Anonymous User"}</p>
                       <p className="font-medium text-slate-500 text-xs truncate max-w-[180px] mt-0.5">{u.email || u.id}</p>

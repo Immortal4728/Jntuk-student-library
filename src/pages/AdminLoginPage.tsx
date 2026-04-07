@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
 import { Lock, Loader2, AlertCircle } from 'lucide-react';
@@ -27,41 +27,29 @@ export default function AdminLoginPage() {
     setError('');
     setLoading(true);
 
+    const emailTrimmed = email.trim();
+    const passwordTrimmed = password.trim();
+
+    console.log("Attempt login:", emailTrimmed);
+
     try {
-      // Try signing in first
-      const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
-      if (cred.user.email === ADMIN_EMAIL) {
-        navigate('/admin', { replace: true });
-      } else {
-        setError('This account does not have admin privileges.');
-      }
-    } catch (err: any) {
-      const code = err?.code || '';
+      const cred = await signInWithEmailAndPassword(auth, emailTrimmed, passwordTrimmed);
       
-      // Account doesn't exist yet — bootstrap it once
-      if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
-        try {
-          const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
-          if (cred.user.email === ADMIN_EMAIL) {
-            navigate('/admin', { replace: true });
-          }
-        } catch (createErr: any) {
-          const createCode = createErr?.code || '';
-          if (createCode === 'auth/email-already-in-use') {
-            // Account exists but password is wrong
-            setError('Invalid password. Account exists but credentials don\'t match.');
-          } else if (createCode === 'auth/weak-password') {
-            setError('Password must be at least 6 characters.');
-          } else {
-            setError(createErr?.message || 'Failed to bootstrap admin account.');
-          }
-        }
-      } else if (code === 'auth/wrong-password') {
-        setError('Invalid password.');
-      } else if (code === 'auth/too-many-requests') {
-        setError('Too many attempts. Try again later.');
+      if (cred.user.email !== ADMIN_EMAIL) {
+        await auth.signOut();
+        throw new Error("Not authorized as admin");
+      }
+
+      navigate('/admin', { replace: true });
+    } catch (error: any) {
+      console.log(error.code);
+
+      if (error.code === "auth/invalid-credential") {
+        setError("Invalid email or password");
+      } else if (error.message === "Not authorized as admin") {
+        setError("Access denied: Admin only");
       } else {
-        setError(err?.message || 'Authentication failed.');
+        setError("Login failed");
       }
     } finally {
       setLoading(false);

@@ -787,7 +787,7 @@ export default function AcademicTrackerPage() {
                 ))}
               </div>
               <p className="text-[11px] text-indigo-600 mt-3">
-                SGPA = Σ(grade × credits) / Σ(credits) &nbsp;|&nbsp; % = CGPA × 9.5
+                SGPA = Σ(grade × credits) / Σ(credits) &nbsp;|&nbsp; % = (CGPA - 0.5) × 10
               </p>
             </div>
           </div>

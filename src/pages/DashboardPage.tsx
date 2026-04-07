@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { 
   Semester, 
   calcCGPA, 
+  cgpaToPercentage,
   totalCreditsAll,
   totalBacklogs
 } from "../lib/academicUtils";
@@ -58,7 +59,7 @@ export default function DashboardPage() {
   // Tracker Calculations
   const cgpaValue = calcCGPA(semesters);
   const cgpa = cgpaValue > 0 ? cgpaValue.toFixed(2) : "0.00";
-  const percentage = cgpaValue > 0 ? (cgpaValue * 9.5).toFixed(1) : "0";
+  const percentage = cgpaValue > 0 ? cgpaToPercentage(cgpaValue).toFixed(2) : "0.00";
   const semestersCompleted = semesters.length;
   const activeBacklogs = totalBacklogs(semesters);
   
