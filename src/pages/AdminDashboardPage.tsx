@@ -144,7 +144,12 @@ function DashboardTab({ setTab }: { setTab: (t: string) => void }) {
   const [usersCount, setUsersCount] = useState<number | null>(null);
 
   useEffect(() => {
-    getDocs(collection(db, "users")).then(snap => setUsersCount(snap.size)).catch(() => setUsersCount(0));
+    const unsub = onSnapshot(collection(db, "users"), (snap) => {
+      setUsersCount(snap.size);
+    }, () => {
+      setUsersCount(0);
+    });
+    return () => unsub();
   }, []);
 
   return (

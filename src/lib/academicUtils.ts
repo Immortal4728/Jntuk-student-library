@@ -52,11 +52,13 @@ export function calcSGPA(subjects: Subject[]): number {
 
 // ─── Total credits for a semester ───
 export function totalCredits(subjects: Subject[]): number {
+  if (!subjects) return 0;
   return subjects.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
 }
 
 // ─── Backlog count for a semester ───
 export function backlogCount(subjects: Subject[]): number {
+  if (!subjects) return 0;
   return subjects.filter((s) => s.grade === "F").length;
 }
 
@@ -68,6 +70,7 @@ export function calcCGPA(semesters: Semester[]): number {
   let totalPoints = 0;
 
   for (const sem of semesters) {
+    if (!sem.subjects) continue;
     for (const sub of sem.subjects) {
       const gradePoint = GRADE_POINTS[sub.grade];
       if (gradePoint === undefined) continue;

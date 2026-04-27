@@ -125,7 +125,7 @@ function CircularProgress({
 
 // ─── Main Component ───
 export default function AcademicTrackerPage() {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<TabKey>("sgpa");
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [loading, setLoading] = useState(true);
@@ -160,9 +160,29 @@ export default function AcademicTrackerPage() {
         const snap = await getDoc(docRef);
         if (snap.exists()) {
           const data = snap.data();
-          setSemesters(data.semesters || []);
-          if (data.semesters?.length > 0) {
-            setActiveSemTab(data.semesters[0].semId);
+          
+          let rawSemesters: any[] = [];
+          if (Array.isArray(data.semesters)) {
+            rawSemesters = data.semesters;
+          } else {
+            // Legacy format: Array saved directly to document, creating keys "0", "1", "2"...
+            const values = Object.values(data);
+            rawSemesters = values.filter((v: any) => v && typeof v === 'object' && v.semId);
+          }
+
+          const normalized = rawSemesters.map((sem: any) => ({
+            ...sem,
+            subjects: sem.subjects || [],
+          }));
+          
+          // Ensure they are sorted properly
+          normalized.sort(
+            (a, b) => ALL_SEMESTER_IDS.indexOf(a.semId) - ALL_SEMESTER_IDS.indexOf(b.semId)
+          );
+
+          setSemesters(normalized);
+          if (normalized.length > 0) {
+            setActiveSemTab(normalized[0].semId);
           }
         }
       } catch (err) {
@@ -185,8 +205,14 @@ export default function AcademicTrackerPage() {
 
         // Calculate CGPA and update the main user document
         const currentCgpa = calcCGPA(data);
-        const userDocRef = doc(db, "users", user.uid);
-        await setDoc(userDocRef, { cgpa: currentCgpa, updatedAt: new Date().toISOString() }, { merge: true });
+        const currentPercentage = cgpaToPercentage(currentCgpa);
+        if (updateProfile) {
+          // This updates the local context AND Firestore seamlessly
+          await updateProfile({ cgpa: currentCgpa, percentage: currentPercentage });
+        } else {
+          const userDocRef = doc(db, "users", user.uid);
+          await setDoc(userDocRef, { cgpa: currentCgpa, percentage: currentPercentage, updatedAt: new Date().toISOString() }, { merge: true });
+        }
 
         setSaveToast(true);
         setTimeout(() => setSaveToast(false), 1500);
@@ -196,7 +222,7 @@ export default function AcademicTrackerPage() {
         setSaving(false);
       }
     },
-    [user]
+    [user, updateProfile]
   );
 
   const debouncedSave = useCallback(
