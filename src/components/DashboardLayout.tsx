@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import DashboardSidebar from "./DashboardSidebar";
 import LoginModal from "./LoginModal";
-import { X, Camera, Loader2, UserCircle, CheckCircle, AlertCircle } from "lucide-react";
+import { X, Camera, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import Cropper from "react-easy-crop";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";

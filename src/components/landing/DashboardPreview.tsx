@@ -7,7 +7,7 @@ function AnimBar({ height, delay, color }: { height: number; delay: number; colo
   return (
     <motion.div className="flex-1 rounded-t-md" style={{ backgroundColor: color }}
       initial={{ height: 0 }} whileInView={{ height: `${height}%` }}
-      viewport={{ once: true }} transition={{ duration: 1.2, delay, ease: [0.22, 1, 0.36, 1] }} />
+      viewport={{ once: true }} transition={{ duration: 1.2, delay, ease: [0.22, 1, 0.36, 1] as const }} />
   );
 }
 
@@ -74,7 +74,7 @@ export default function DashboardPreview() {
 
         {/* Dashboard Mockup */}
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          viewport={{ once: true }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
           className="relative rounded-2xl border border-slate-200/80 bg-white overflow-hidden"
           style={{ boxShadow: '0 24px 80px -16px rgba(0,0,0,0.1), 0 0 0 1px rgba(99,102,241,0.03)' }}>
           

@@ -2,12 +2,12 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   Calculator, BookOpen, FileText, BarChart3, AlertTriangle,
-  LayoutDashboard, TrendingUp, GraduationCap, ChevronRight, Star, Zap
+  LayoutDashboard, TrendingUp, GraduationCap, ChevronRight, Zap
 } from 'lucide-react';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const } },
 };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 
@@ -94,7 +94,7 @@ export default function FeaturesGrid() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
           {features.map((f) => (
             <motion.div key={f.title} variants={fadeUp}
-              whileHover={{ y: -8, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } }}
+              whileHover={{ y: -8, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] as const } }}
               className="group relative rounded-2xl border border-slate-200/80 bg-white p-6 transition-all duration-400 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] hover:border-slate-300/60 overflow-hidden">
               
               {/* Gradient overlay on hover */}

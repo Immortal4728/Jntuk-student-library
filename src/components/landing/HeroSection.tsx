@@ -1,11 +1,11 @@
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, animate } from 'framer-motion';
 import { ArrowRight, Sparkles, Calculator, BookOpen, TrendingUp, BarChart3, FileText, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const } },
 };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
 
@@ -68,7 +68,7 @@ function FloatingWidget({ children, className, delay = 0, y = [0, -12, 0], durat
     <motion.div
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: delay + 0.5, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.8, delay: delay + 0.5, ease: [0.22, 1, 0.36, 1] as const }}
       className={className}
     >
       <motion.div
@@ -91,7 +91,7 @@ function AnimatedSGPA() {
     const timeout = setTimeout(() => {
       const ctrl = animate(0, 8.72, {
         duration: 2.5,
-        ease: [0.22, 1, 0.36, 1],
+        ease: [0.22, 1, 0.36, 1] as const,
         onUpdate: (v) => setVal(parseFloat(v.toFixed(2))),
       });
       return () => ctrl.stop();
@@ -110,7 +110,7 @@ function MiniBarChart() {
         <motion.div key={i} className="flex-1 rounded-sm min-w-[4px] bg-slate-300"
           initial={{ height: 0 }}
           animate={{ height: `${h}%` }}
-          transition={{ duration: 0.8, delay: 1.5 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.8, delay: 1.5 + i * 0.08, ease: [0.22, 1, 0.36, 1] as const }}
         />
       ))}
     </div>
@@ -281,7 +281,7 @@ export default function HeroSection() {
                 <motion.div className="h-full rounded-full bg-slate-800"
                   initial={{ width: '0%' }}
                   animate={{ width: '87%' }}
-                  transition={{ duration: 2, delay: 1.8, ease: [0.22, 1, 0.36, 1] }} />
+                  transition={{ duration: 2, delay: 1.8, ease: [0.22, 1, 0.36, 1] as const }} />
               </div>
               <div className="flex justify-between mt-1">
                 <span className="text-[9px] font-medium text-slate-400">0.0</span>

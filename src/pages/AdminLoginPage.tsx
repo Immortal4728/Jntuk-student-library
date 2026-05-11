@@ -6,12 +6,12 @@ import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import {
   Shield, Lock, Loader2, AlertCircle, ArrowRight, Eye, EyeOff,
-  Users, BookOpen, BarChart3, Activity, TrendingUp, Zap
+  Users, BookOpen, BarChart3, Activity, Zap
 } from 'lucide-react';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
 };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 
@@ -23,7 +23,7 @@ function FloatingCard({ icon: Icon, label, value, color, delay, y }: {
     <motion.div
       initial={{ opacity: 0, scale: 0.85, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.7, delay: 0.8 + delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.7, delay: 0.8 + delay, ease: [0.22, 1, 0.36, 1] as const }}
     >
       <motion.div
         animate={{ y }}
@@ -225,7 +225,7 @@ export default function AdminLoginPage() {
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] as const }}
                 className="w-14 h-14 bg-gradient-to-br from-indigo-50 to-violet-50 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-indigo-100/60"
                 style={{ boxShadow: '0 4px 16px rgba(99,102,241,0.08)' }}
               >

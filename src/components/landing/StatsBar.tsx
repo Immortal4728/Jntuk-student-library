@@ -12,7 +12,7 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
       if (e.isIntersecting && !done.current) {
         done.current = true;
         const c = animate(0, target, {
-          duration: 2, ease: [0.22, 1, 0.36, 1],
+          duration: 2, ease: [0.22, 1, 0.36, 1] as const,
           onUpdate: (v) => setCount(Math.round(v)),
         });
         return () => c.stop();

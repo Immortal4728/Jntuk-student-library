@@ -3,9 +3,9 @@ import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard, Users, BookOpen, LogOut, Trash2,
   Shield, Eye, Settings, Server, Database, Activity,
-  AlertTriangle, RefreshCcw, Loader2, Search, Filter,
-  ChevronDown, TrendingUp, BarChart3, ChevronRight,
-  UserX, MoreVertical
+  AlertTriangle, Loader2, Search,
+  TrendingUp, ChevronRight,
+  UserX
 } from "lucide-react";
 import { db } from "../lib/firebase";
 import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
@@ -327,7 +327,7 @@ function DashboardTab({ users, loading, setTab }: { users: any[], loading: boole
 function UsersTab({ users, loading }: { users: any[], loading: boolean }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterBranch, setFilterBranch] = useState("ALL");
-  const [filterSem, setFilterSem] = useState("ALL");
+  const [filterSem] = useState("ALL");
   const [sortBy, setSortBy] = useState("recent"); // recent | cgpa
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
 

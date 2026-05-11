@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { useNavigate } from "react-router-dom";
 import { 
   Semester, 
   calcCGPA, 
@@ -20,7 +19,6 @@ import {
 
 export default function DashboardPage() {
   const { user, profile } = useAuth();
-  const navigate = useNavigate();
   const [greeting, setGreeting] = useState("");
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [chartMode, setChartMode] = useState<"sgpa" | "cgpa">("sgpa");

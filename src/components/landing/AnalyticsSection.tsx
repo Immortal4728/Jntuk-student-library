@@ -3,7 +3,7 @@ import { TrendingUp, BarChart3, Target, Zap } from 'lucide-react';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
 function MiniLineChart() {
@@ -32,7 +32,7 @@ function MiniLineChart() {
         viewport={{ once: true }} transition={{ duration: 1, delay: 0.5 }} />
       <motion.path d={path} fill="none" stroke="url(#lineGrad)" strokeWidth="2" strokeLinecap="round"
         initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }}
-        viewport={{ once: true }} transition={{ duration: 2, delay: 0.3, ease: [0.22, 1, 0.36, 1] }} />
+        viewport={{ once: true }} transition={{ duration: 2, delay: 0.3, ease: [0.22, 1, 0.36, 1] as const }} />
     </svg>
   );
 }
@@ -47,7 +47,7 @@ function CircularProgress({ value, label, color }: { value: number; label: strin
           strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c}
           initial={{ strokeDashoffset: c }}
           whileInView={{ strokeDashoffset: c - (value / 100) * c }}
-          viewport={{ once: true }} transition={{ duration: 1.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          viewport={{ once: true }} transition={{ duration: 1.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] as const }}
           transform="rotate(-90 44 44)" />
         <text x="44" y="44" textAnchor="middle" dominantBaseline="central"
           className="text-sm font-bold fill-slate-900">{value}%</text>

@@ -7,7 +7,6 @@ import {
   Menu,
   X,
   AlertCircle,
-  UserCircle,
   Settings,
   LayoutDashboard,
   GraduationCap,
@@ -15,10 +14,9 @@ import {
   FileBadge,
   Sparkles,
   Sun,
-  Moon,
-  ChevronRight,
+  ChevronRight
 } from "lucide-react";
-import { Button } from "./ui/button";
+
 import { getDisplaySemester } from "../lib/utils";
 import { UserAvatar } from "./ui/UserAvatar";
 
@@ -71,12 +69,7 @@ export default function DashboardSidebar({
     user?.email?.split("@")[0] ||
     "Student";
 
-  const initials = displayName
-    .split(" ")
-    .map((n: string) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+
 
   return (
     <>
