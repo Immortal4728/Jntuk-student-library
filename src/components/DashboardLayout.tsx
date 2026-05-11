@@ -10,6 +10,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../lib/firebase";
 import { subjectsData, commonFirstYear } from "../lib/data";
 import { getDisplaySemester } from "../lib/utils";
+import { UserAvatar } from "./ui/UserAvatar";
 
 // --- Helper: Crop Image to Blob ---
 async function getCroppedImg(imageSrc: string, pixelCrop: any): Promise<Blob | null> {
@@ -225,29 +226,33 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f8fafc] text-slate-900 font-sans">
+    <div className="flex h-screen overflow-hidden bg-navy-900 text-slate-100 font-sans">
+      {/* Ambient background glows */}
+      <div className="ambient-glow ambient-glow-1" />
+      <div className="ambient-glow ambient-glow-2" />
+
       <DashboardSidebar
         onOpenBacklogModal={openBacklogModal}
         onOpenProfileEdit={openProfileEdit}
         onOpenContextSwitcher={openContextSwitcher}
       />
 
-      <main id="dashboard-scroll-container" className="flex-1 overflow-y-auto pt-14 md:pt-0 relative">
+      <main id="dashboard-scroll-container" className="flex-1 overflow-y-auto pt-14 md:pt-0 relative z-10">
         {/* Profile loading skeleton */}
         {profileLoading ? (
-          <div className="max-w-4xl mx-auto p-4 md:p-8 pb-24">
+          <div className="max-w-5xl mx-auto p-4 md:p-8 pb-24">
             <div className="animate-pulse space-y-6">
-              <div className="h-40 bg-slate-200 rounded-2xl" />
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="h-44 bg-white/[0.03] rounded-2xl" />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-24 bg-slate-200 rounded-xl" />
+                  <div key={i} className="h-28 bg-white/[0.03] rounded-2xl" />
                 ))}
               </div>
-              <div className="h-32 bg-slate-200 rounded-xl" />
+              <div className="h-36 bg-white/[0.03] rounded-2xl" />
             </div>
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto p-4 md:p-8 pb-24">
+          <div className="max-w-5xl mx-auto p-4 md:p-8 pb-24">
             <Outlet />
           </div>
         )}
@@ -257,12 +262,12 @@ export default function DashboardLayout() {
           MODAL: EDIT PROFILE (with image upload)
          ════════════════════════════════════════════════════════ */}
       {isProfileEditOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-navy-700 border border-white/[0.06] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-modal overflow-hidden flex flex-col max-h-[90vh]">
             {/* Header */}
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+            <div className="p-5 border-b border-white/[0.06] flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-lg text-slate-900">
+                <h3 className="font-bold text-lg text-white">
                   Edit Profile
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -271,33 +276,29 @@ export default function DashboardLayout() {
               </div>
               <button
                 onClick={() => setIsProfileEditOpen(false)}
-                className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"
+                className="p-2 text-slate-500 hover:bg-white/[0.05] rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Body */}
-            <div className="p-5 overflow-y-auto space-y-5 flex-1 bg-slate-50/50">
+            <div className="p-5 overflow-y-auto space-y-5 flex-1 bg-navy-800/50">
               {/* Profile Image Upload */}
               <div className="flex flex-col items-center">
                 <div className="relative group">
-                  {editPhotoURL ? (
-                    <img
-                      src={editPhotoURL}
-                      alt="Profile"
-                      className="w-20 h-20 rounded-full object-cover border-2 border-slate-200 shadow-sm transition-opacity"
-                      style={{ opacity: isUploadingPhoto ? 0.5 : 1 }}
+                  <div className="relative">
+                    <UserAvatar
+                      photoURL={editPhotoURL}
+                      name={editName}
+                      className="w-20 h-20 border-2 border-slate-200"
                     />
-                  ) : (
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center border-2 border-slate-200 shadow-sm relative">
-                      {isUploadingPhoto ? (
-                         <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
-                      ) : (
-                         <UserCircle className="w-12 h-12 text-slate-300" />
-                      )}
-                    </div>
-                  )}
+                    {isUploadingPhoto && (
+                      <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                      </div>
+                    )}
+                  </div>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
@@ -343,7 +344,7 @@ export default function DashboardLayout() {
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   placeholder="Your name"
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                  className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/30"
                 />
               </div>
 
@@ -357,7 +358,7 @@ export default function DashboardLayout() {
                   value={editCollege}
                   onChange={(e) => setEditCollege(e.target.value)}
                   placeholder="College name"
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                  className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/30"
                 />
               </div>
 
@@ -370,7 +371,7 @@ export default function DashboardLayout() {
                   <select
                     value={editBranch}
                     onChange={(e) => setEditBranch(e.target.value)}
-                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                    className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/30"
                   >
                     {branches.map((b) => (
                       <option key={b} value={b}>
@@ -386,7 +387,7 @@ export default function DashboardLayout() {
                   <select
                     value={editSemester}
                     onChange={(e) => setEditSemester(e.target.value)}
-                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                    className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/30"
                   >
                     {semesters.map((s) => (
                       <option key={s} value={s}>
@@ -399,11 +400,11 @@ export default function DashboardLayout() {
             </div>
 
             {/* Footer */}
-            <div className="p-5 border-t border-slate-100 bg-white">
+            <div className="p-5 border-t border-white/[0.06] bg-navy-800">
               <Button
                 onClick={handleSaveProfile}
                 disabled={isSaving || isUploadingPhoto}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white h-12 shadow-sm font-semibold disabled:opacity-60"
+                className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white h-12 shadow-glow font-semibold disabled:opacity-60"
               >
                 {isSaving ? (
                   <span className="flex items-center gap-2">
@@ -423,22 +424,22 @@ export default function DashboardLayout() {
           MODAL: IMAGE CROPPER
          ════════════════════════════════════════════════════════ */}
       {isCropping && cropImageSrc && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-navy-700 border border-white/[0.06] rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-modal animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-4 border-b border-white/[0.06] flex justify-between items-center">
               <div>
-                <h3 className="font-bold text-slate-900">Adjust Photo</h3>
+                <h3 className="font-bold text-white">Adjust Photo</h3>
                 <p className="text-[11px] font-medium text-slate-500 mt-0.5">Drag and zoom to frame your picture.</p>
               </div>
               <button 
                 onClick={() => { setIsCropping(false); setCropImageSrc(null); }} 
-                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                className="p-1.5 text-slate-500 hover:text-white hover:bg-white/[0.05] rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="relative w-full h-72 bg-slate-900">
+            <div className="relative w-full h-72 bg-navy-900">
               <Cropper
                 image={cropImageSrc}
                 crop={crop}
@@ -454,9 +455,9 @@ export default function DashboardLayout() {
               />
             </div>
             
-            <div className="p-5 space-y-5 bg-slate-50">
+            <div className="p-5 space-y-5 bg-navy-800/50">
               <div className="flex items-center gap-4">
-                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Zoom</span>
+                 <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Zoom</span>
                  <input
                    type="range"
                    value={zoom}
@@ -465,14 +466,14 @@ export default function DashboardLayout() {
                    step={0.05}
                    aria-label="Zoom"
                    onChange={(e) => setZoom(Number(e.target.value))}
-                   className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                   className="w-full h-1.5 bg-white/[0.06] rounded-lg appearance-none cursor-pointer accent-violet-500"
                  />
               </div>
               
               <Button 
                 onClick={handleCropComplete} 
                 disabled={isUploadingPhoto} 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 shadow-sm font-semibold flex items-center justify-center"
+                className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white h-11 shadow-glow font-semibold flex items-center justify-center"
               >
                 {isUploadingPhoto ? (
                   <span className="flex items-center gap-2">
@@ -492,15 +493,15 @@ export default function DashboardLayout() {
           MODAL: CONTEXT SWITCHER
          ════════════════════════════════════════════════════════ */}
       {isContextSwitcherOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm shadow-2xl overflow-hidden">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-lg text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-navy-700 border border-white/[0.06] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm shadow-modal overflow-hidden">
+            <div className="p-5 border-b border-white/[0.06] flex items-center justify-between">
+              <h3 className="font-bold text-lg text-white">
                 Switch Context
               </h3>
               <button
                 onClick={() => setIsContextSwitcherOpen(false)}
-                className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"
+                className="p-2 text-slate-500 hover:bg-white/[0.05] rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -514,7 +515,7 @@ export default function DashboardLayout() {
                 <select
                   value={tempBranch}
                   onChange={(e) => setTempBranch(e.target.value)}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                  className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30"
                 >
                   {branches.map((b) => (
                     <option key={b} value={b}>
@@ -530,7 +531,7 @@ export default function DashboardLayout() {
                 <select
                   value={tempSem}
                   onChange={(e) => setTempSem(e.target.value)}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                  className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30"
                 >
                   {semesters.map((s) => (
                     <option key={s} value={s}>
@@ -541,11 +542,11 @@ export default function DashboardLayout() {
               </div>
             </div>
 
-            <div className="p-5 border-t border-slate-100">
+            <div className="p-5 border-t border-white/[0.06]">
               <Button
                 onClick={handleSaveContext}
                 disabled={isSaving}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white h-12 shadow-sm font-semibold disabled:opacity-60"
+                className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white h-12 shadow-glow font-semibold disabled:opacity-60"
               >
                 {isSaving ? (
                   <span className="flex items-center gap-2">
@@ -565,11 +566,11 @@ export default function DashboardLayout() {
           MODAL: UPDATE BACKLOGS
          ════════════════════════════════════════════════════════ */}
       {isBacklogModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-navy-700 border border-white/[0.06] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-modal overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-5 border-b border-white/[0.06] flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-lg text-slate-900">
+                <h3 className="font-bold text-lg text-white">
                   Update Backlogs
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -578,13 +579,13 @@ export default function DashboardLayout() {
               </div>
               <button
                 onClick={() => setIsBacklogModalOpen(false)}
-                className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"
+                className="p-2 text-slate-500 hover:bg-white/[0.05] rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-5 overflow-y-auto w-full space-y-6 flex-1 bg-slate-50/50">
+            <div className="p-5 overflow-y-auto w-full space-y-6 flex-1 bg-navy-800/50">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider ml-1">
@@ -593,7 +594,7 @@ export default function DashboardLayout() {
                   <select 
                     value={backlogYear}
                     onChange={(e) => setBacklogYear(e.target.value)}
-                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                    className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30"
                   >
                     <option value="1">1st Year</option>
                     <option value="2">2nd Year</option>
@@ -608,7 +609,7 @@ export default function DashboardLayout() {
                   <select 
                     value={backlogSem}
                     onChange={(e) => setBacklogSem(e.target.value)}
-                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                    className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30"
                   >
                     <option value="1">Sem 1</option>
                     <option value="2">Sem 2</option>
@@ -620,21 +621,21 @@ export default function DashboardLayout() {
                 <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider ml-1 mb-1 block">
                   Select Subjects ({backlogOptions.length} available)
                 </label>
-                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
                   {backlogOptions.length > 0 ? (
-                    <div className="divide-y divide-slate-100 max-h-60 overflow-y-auto">
+                    <div className="divide-y divide-white/[0.04] max-h-60 overflow-y-auto">
                       {backlogOptions.map((sub) => (
                         <label
                           key={sub}
-                          className="flex items-center gap-3 p-3.5 hover:bg-slate-50 cursor-pointer transition-colors"
+                          className="flex items-center gap-3 p-3.5 hover:bg-white/[0.03] cursor-pointer transition-colors"
                         >
                           <input
                             type="checkbox"
                             checked={selectedBacklogs.includes(sub)}
                             onChange={() => toggleBacklog(sub)}
-                            className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white"
+                            className="w-4 h-4 rounded border-white/20 text-violet-600 focus:ring-violet-500 bg-white/[0.05]"
                           />
-                          <span className="text-sm font-medium text-slate-700">
+                          <span className="text-sm font-medium text-slate-300">
                             {sub}
                           </span>
                         </label>
@@ -650,11 +651,11 @@ export default function DashboardLayout() {
               </div>
             </div>
 
-            <div className="p-5 border-t border-slate-100 bg-white">
+            <div className="p-5 border-t border-white/[0.06] bg-navy-800">
               <Button
                 onClick={handleSaveBacklogs}
                 disabled={isSaving}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white h-12 shadow-sm font-semibold disabled:opacity-60"
+                className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white h-12 shadow-glow font-semibold disabled:opacity-60"
               >
                 {isSaving ? (
                   <span className="flex items-center gap-2">

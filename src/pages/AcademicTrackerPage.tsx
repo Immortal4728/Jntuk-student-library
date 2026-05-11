@@ -367,17 +367,17 @@ export default function AcademicTrackerPage() {
   return (
     <div className="space-y-6 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* ─── HEADER ─── */}
-      <header className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 p-6 text-white shadow-xl">
+      <header className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 p-6 shadow-xl">
         <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-[60px] -mr-10 -mt-10" />
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-400/20 rounded-full blur-[50px] -ml-8 -mb-8" />
         <div className="relative z-10">
           <div className="flex items-center gap-2.5 mb-1">
-            <div className="w-9 h-9 bg-white/15 backdrop-blur-md rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 bg-white/15 backdrop-blur-md rounded-xl flex items-center justify-center text-[#FFFFFF]">
               <GraduationCap className="w-5 h-5" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight">Academic Tracker</h1>
+            <h1 className="text-2xl font-black tracking-tight text-[#FFFFFF]">Academic Tracker</h1>
           </div>
-          <p className="text-indigo-100 text-sm mt-1 ml-0.5">
+          <p className="text-[15px] font-medium mt-1 ml-0.5 text-[rgba(255,255,255,0.85)]">
             Track SGPA, CGPA, and manage your semester grades
           </p>
         </div>
@@ -391,7 +391,7 @@ export default function AcademicTrackerPage() {
             onClick={() => setActiveTab(tab.key)}
             className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-sm font-bold transition-all duration-300 ${
               activeTab === tab.key
-                ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/30"
+                ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-[#FFFFFF] shadow-lg shadow-indigo-500/30"
                 : "text-gray-500 hover:bg-gray-50 active:bg-gray-100"
             }`}
           >

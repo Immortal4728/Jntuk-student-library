@@ -57,7 +57,7 @@ export const ModemAnimatedFooter = ({
                     <a
                       key={index}
                       href={link.href}
-                      className="text-[#94a3b8] hover:text-[#0f172a] transition-colors"
+                      className="text-[#64748b] hover:text-[#0f172a] transition-colors"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -107,7 +107,7 @@ export const ModemAnimatedFooter = ({
 
         {/* Large background text */}
         <div
-          className="bg-gradient-to-b from-[#0f172a]/20 via-[#0f172a]/10 to-transparent bg-clip-text text-transparent leading-none absolute left-1/2 -translate-x-1/2 bottom-40 md:bottom-32 font-extrabold tracking-tighter pointer-events-none select-none text-center px-4"
+          className="bg-gradient-to-b from-[#0f172a]/25 via-[#0f172a]/12 to-transparent bg-clip-text text-transparent leading-none absolute left-1/2 -translate-x-1/2 bottom-40 md:bottom-32 font-extrabold tracking-tighter pointer-events-none select-none text-center px-4"
           style={{
             fontSize: 'clamp(3rem, 12vw, 10rem)',
             maxWidth: '95vw',

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'Materials', path: '/materials' },
+  { name: 'Dashboard', path: '/dashboard' },
   { name: 'About', path: '/about' },
 ];
 
@@ -38,11 +39,11 @@ export default function Navbar() {
             onClick={() => setOpen(false)}
             className="flex items-center gap-2.5 active:scale-[0.97] transition-transform z-10"
           >
-            <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)' }}>
               <BookOpen size={15} className="text-white" />
             </div>
             <span className="text-[0.9375rem] font-bold text-[#0f172a] tracking-tight">
-              JNTUK Library
+              JNTUK <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Hub</span>
             </span>
           </Link>
 
@@ -67,7 +68,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3 z-10">
             <Link
               to="/login/student"
-              className="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-[0.8125rem] font-semibold hover:bg-slate-800 shadow-[0_2px_12px_rgba(15,23,42,0.2)] active:scale-[0.97] transition-all duration-200"
+              className="px-5 py-2.5 rounded-xl text-white text-[0.8125rem] font-semibold shadow-[0_2px_12px_rgba(99,102,241,0.25)] active:scale-[0.97] transition-all duration-200 hover:shadow-[0_4px_16px_rgba(99,102,241,0.35)]" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)' }}
             >
               Student Login
             </Link>
@@ -110,7 +111,7 @@ export default function Navbar() {
               {/* Top Header */}
               <div className="flex items-center justify-between px-6 min-h-[4.5rem] border-b border-[#e5e7eb]/80">
                 <span className="text-[1.0625rem] font-bold text-[#0f172a] tracking-tight">
-                  JNTUK Library
+                  JNTUK <span className="text-indigo-600">Hub</span>
                 </span>
                 <button
                   onClick={() => setOpen(false)}

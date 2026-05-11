@@ -80,7 +80,8 @@ export function Header() {
 						<div className="hidden md:flex items-center gap-2 rounded-full px-2 py-1">
 							<Link 
 								to="/login/student"
-								className="px-4 py-1.5 text-[13px] font-medium text-white bg-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all duration-200 ease-out hover:bg-black hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] active:scale-[0.96] rounded-full"
+								className="px-4 py-1.5 text-[13px] font-medium rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all duration-200 ease-out hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] active:scale-[0.96]"
+								style={{ backgroundColor: '#111827', color: '#ffffff' }}
 							>
 								Student Login
 							</Link>
@@ -171,7 +172,8 @@ export function Header() {
 								<Link
 									to="/login/student"
 									onClick={() => setOpen(false)}
-									className="flex items-center justify-center w-full h-[56px] rounded-2xl bg-gray-900 text-white text-[1rem] font-bold active:scale-[0.98] transition-all shadow-[0_4px_16px_rgba(17,24,39,0.15)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
+									className="flex items-center justify-center w-full h-[56px] rounded-2xl text-[1rem] font-bold active:scale-[0.98] transition-all shadow-[0_4px_16px_rgba(17,24,39,0.15)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
+								style={{ backgroundColor: '#111827', color: '#ffffff' }}
 								>
 									Student Login
 								</Link>
