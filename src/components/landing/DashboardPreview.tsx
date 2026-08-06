@@ -46,26 +46,18 @@ export default function DashboardPreview() {
   ];
 
   return (
-    <section ref={ref} className="relative w-full bg-[#fafafa] border-t border-slate-100 overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] rounded-full bg-gradient-to-b from-indigo-100/20 to-transparent blur-3xl pointer-events-none" />
-      <motion.div
-        className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-gradient-to-tl from-violet-100/20 to-transparent blur-[100px] pointer-events-none"
-        animate={{ scale: [1, 1.1, 1] }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-      />
-
-      <div className="relative z-10 max-w-[1200px] mx-auto px-5 sm:px-8 lg:px-16 py-20 lg:py-28">
+    <section ref={ref} aria-label="Dashboard preview" className="relative w-full bg-slate-50/50 border-t border-slate-200/60 overflow-hidden">
+      <div className="relative z-10 max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 py-14 lg:py-20">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-50 border border-violet-100/80 text-violet-600 text-[11px] font-bold tracking-[0.15em] uppercase mb-5">
-            <Zap size={12} className="text-violet-500" />
+          viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[11px] font-bold tracking-[0.12em] uppercase mb-4">
+            <Zap size={12} className="text-blue-500" />
             Dashboard Preview
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-3">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight mb-3">
             Your academic life,{' '}
-            <span className="bg-gradient-to-r from-violet-600 to-indigo-500 bg-clip-text text-transparent">visualized</span>
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">visualized</span>
           </h2>
           <p className="text-base sm:text-lg text-slate-600 max-w-xl mx-auto font-medium">
             Real-time insights into your performance, trends, and academic progress.
@@ -73,82 +65,73 @@ export default function DashboardPreview() {
         </motion.div>
 
         {/* Dashboard Mockup */}
-        <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
-          className="relative rounded-2xl border border-slate-200/80 bg-white overflow-hidden"
-          style={{ boxShadow: '0 24px 80px -16px rgba(0,0,0,0.1), 0 0 0 1px rgba(99,102,241,0.03)' }}>
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
+          className="relative rounded-2xl border border-slate-200/90 bg-white overflow-hidden"
+          style={{ boxShadow: '0 20px 60px -15px rgba(15,23,42,0.08)' }}>
           
           {/* Top bar */}
-          <div className="flex items-center gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50/50">
+          <div className="flex items-center gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50/70">
             <div className="flex gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-red-400/60" />
-              <div className="w-3 h-3 rounded-full bg-amber-400/60" />
-              <div className="w-3 h-3 rounded-full bg-emerald-400/60" />
+              <div className="w-3 h-3 rounded-full bg-red-400/70" />
+              <div className="w-3 h-3 rounded-full bg-amber-400/70" />
+              <div className="w-3 h-3 rounded-full bg-emerald-400/70" />
             </div>
             <div className="flex-1 flex justify-center">
-              <div className="px-4 py-1 rounded-md bg-slate-100 text-[11px] text-slate-400 font-medium">
+              <div className="px-4 py-1 rounded-md bg-white border border-slate-200/60 text-[11px] text-slate-500 font-semibold shadow-2xs">
                 jntuk-library.vercel.app/dashboard
               </div>
             </div>
           </div>
 
           {/* Dashboard content */}
-          <div className="p-5 sm:p-8 grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="p-5 sm:p-7 grid grid-cols-1 lg:grid-cols-3 gap-5">
             {/* CGPA Card */}
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-              className="lg:col-span-1 rounded-xl border border-slate-200/80 bg-gradient-to-br from-indigo-50/50 to-violet-50/30 p-5"
+              whileHover={{ scale: 1.01 }}
+              transition={{ duration: 0.2 }}
+              className="lg:col-span-1 rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.03)]"
             >
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
-                  <Calculator size={16} className="text-indigo-600" />
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center">
+                  <Calculator size={16} className="text-blue-600" />
                 </div>
-                <span className="text-sm font-semibold text-slate-700">Current CGPA</span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Current CGPA</span>
               </div>
-              <div className="text-[3rem] font-extrabold text-slate-900 tracking-tight leading-none mb-1 tabular-nums">
+              <div className="text-[2.75rem] font-extrabold text-[#0F172A] tracking-tight leading-none mb-1.5 tabular-nums">
                 {sgpa}
               </div>
               <div className="flex items-center gap-1.5 text-emerald-600">
                 <TrendingUp size={14} />
-                <span className="text-[12px] font-semibold">+0.32 from last sem</span>
+                <span className="text-[12px] font-bold">+0.32 from last sem</span>
               </div>
-              <div className="mt-4 h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                <motion.div className="h-full rounded-full relative overflow-hidden"
-                  style={{ background: 'linear-gradient(90deg, #6366f1, #8b5cf6)' }}
+              <div className="mt-4 h-2 bg-slate-100 rounded-full overflow-hidden">
+                <motion.div className="h-full rounded-full bg-[#2563EB]"
                   initial={{ width: 0 }} whileInView={{ width: '87%' }}
-                  viewport={{ once: true }} transition={{ duration: 1.5, delay: 0.5 }}>
-                  {/* Shimmer */}
-                  <motion.div
-                    className="absolute inset-0"
-                    style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)' }}
-                    animate={{ x: ['-100%', '100%'] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'linear', delay: 2 }}
-                  />
-                </motion.div>
+                  viewport={{ once: true }} transition={{ duration: 1.5, delay: 0.4 }} />
               </div>
               <div className="flex justify-between mt-1.5">
-                <span className="text-[10px] text-slate-500 font-medium">0.0</span>
-                <span className="text-[10px] text-slate-500 font-medium">10.0</span>
+                <span className="text-[10px] text-slate-400 font-medium">0.0</span>
+                <span className="text-[10px] text-slate-400 font-medium">10.0</span>
               </div>
             </motion.div>
 
             {/* Semester Performance Chart */}
             <motion.div
-              whileHover={{ scale: 1.01 }}
-              transition={{ duration: 0.3 }}
-              className="lg:col-span-2 rounded-xl border border-slate-200/80 bg-white p-5"
+              whileHover={{ scale: 1.005 }}
+              transition={{ duration: 0.2 }}
+              className="lg:col-span-2 rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.03)]"
             >
-              <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
-                    <BarChart3 size={16} className="text-violet-600" />
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+                    <BarChart3 size={16} className="text-indigo-600" />
                   </div>
-                  <span className="text-sm font-semibold text-slate-700">Semester Performance</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Semester Performance</span>
                 </div>
-                <span className="text-[11px] font-medium text-slate-500 px-2.5 py-1 rounded-md bg-slate-50">All Semesters</span>
+                <span className="text-[11px] font-semibold text-slate-600 px-2.5 py-1 rounded-md bg-slate-100/80">All Semesters</span>
               </div>
-              <div className="flex items-end gap-3 h-[160px]">
+              <div className="flex items-end gap-3 h-[150px]">
                 {semesters.map((s, i) => (
                   <div key={s.sem} className="flex-1 flex flex-col items-center gap-2 h-full">
                     <div className="flex-1 w-full flex items-end">
@@ -162,24 +145,23 @@ export default function DashboardPreview() {
 
             {/* Quick Stats Row */}
             {[
-              { label: 'Backlogs', value: '0', icon: BookOpen, color: '#10b981', bg: '#d1fae5', trend: 'Cleared' },
-              { label: 'Credits Earned', value: '142', icon: BarChart3, color: '#3b82f6', bg: '#dbeafe', trend: '/180' },
-              { label: 'Best SGPA', value: '9.3', icon: TrendingUp, color: '#8b5cf6', bg: '#ede9fe', trend: 'Sem 6' },
+              { label: 'Backlogs', value: '0', icon: BookOpen, iconColor: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100', trend: 'Cleared' },
+              { label: 'Credits Earned', value: '142', icon: BarChart3, iconColor: 'text-blue-600', bg: 'bg-blue-50 border-blue-100', trend: '/180' },
+              { label: 'Best SGPA', value: '9.31', icon: TrendingUp, iconColor: 'text-purple-600', bg: 'bg-purple-50 border-purple-100', trend: 'Sem 6' },
             ].map((s) => (
               <motion.div key={s.label}
-                whileHover={{ scale: 1.03, y: -2 }}
-                transition={{ duration: 0.3 }}
-                className="rounded-xl border border-slate-200/80 bg-white p-4 flex items-center gap-4 cursor-default"
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.2 }}
+                className="rounded-xl border border-slate-200/80 bg-white p-4 flex items-center gap-3.5 cursor-default shadow-[0_2px_8px_rgba(15,23,42,0.02)]"
               >
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: s.bg }}>
-                  <s.icon size={18} style={{ color: s.color }} />
+                <div className={`w-10 h-10 rounded-lg border flex items-center justify-center flex-shrink-0 ${s.bg}`}>
+                  <s.icon size={18} className={s.iconColor} />
                 </div>
                 <div>
-                  <div className="text-xl font-bold text-slate-900">{s.value}
-                    <span className="text-[12px] font-medium text-slate-400 ml-1">{s.trend}</span>
+                  <div className="text-xl font-extrabold text-[#0F172A]">{s.value}
+                    <span className="text-[12px] font-semibold text-slate-400 ml-1.5">{s.trend}</span>
                   </div>
-                  <span className="text-[12px] text-slate-500 font-medium">{s.label}</span>
+                  <span className="text-[11px] text-slate-500 font-semibold">{s.label}</span>
                 </div>
               </motion.div>
             ))}

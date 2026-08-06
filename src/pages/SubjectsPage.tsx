@@ -37,10 +37,16 @@ export default function SubjectsPage() {
   return (
     <div className="bg-[#f8fafc] min-h-[calc(100vh-4rem)] selection:bg-slate-900 selection:text-white relative">
       <SEO
-        title={`JNTUK ${branchName} ${currentSemLabel} Materials | Notes, PYQs`}
-        description={`Download JNTUK ${branchName} ${currentSemLabel} semester materials — unit-wise notes, previous papers, and important questions. R23 Regulation.`}
-        keywords={`JNTUK ${branchName} ${currentSemLabel}, ${branchName} ${currentSemLabel} notes, ${branchName} ${currentSemLabel} PYQs, JNTUK ${currentSemLabel} semester materials, R23 ${branchName}`}
+        title={`JNTUK ${branchName} ${currentSemLabel} Materials — Notes, PYQs & Important Questions`}
+        description={`Download JNTUK ${branchName} ${currentSemLabel} semester study materials — unit-wise notes, previous year question papers (PYQs), and important questions. R23 Regulation. Free access for all JNTUK students.`}
+        keywords={`JNTUK ${branchName} ${currentSemLabel}, ${branchName} ${currentSemLabel} notes, ${branchName} ${currentSemLabel} PYQs, ${branchName} ${currentSemLabel} previous papers, JNTUK ${currentSemLabel} semester materials, R23 ${branchName}, ${branchName} ${currentSemLabel} important questions`}
         canonicalUrl={`/materials/${branch}/semester/${semesterNumber}`}
+        breadcrumbs={[
+          { name: 'Home', url: '/' },
+          { name: 'Materials', url: '/materials' },
+          { name: branchName, url: `/materials/${branch}` },
+          { name: `Semester ${currentSemLabel}`, url: `/materials/${branch}/semester/${semesterNumber}` },
+        ]}
       />
       <motion.div 
         initial={{ opacity: 0, scale: 0.98, y: 15 }}
@@ -192,7 +198,7 @@ export default function SubjectsPage() {
                             </div>
                           )}
                           
-                          <h3 className={`text-[1.1875rem] font-bold truncate transition-colors duration-200 ${
+                          <h3 className={`text-[1.1875rem] font-bold break-words whitespace-normal transition-colors duration-200 ${
                             isExpanded ? 'text-slate-900' : 'text-slate-800'
                           }`}>
                             {subject.name}

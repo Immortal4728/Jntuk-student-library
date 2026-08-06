@@ -1,10 +1,28 @@
+# JNTUK Library — robots.txt
+# https://jntuk-student-library.vercel.app
+
 User-agent: *
 Allow: /
+Allow: /materials
+Allow: /about
 
-# Block admin/dashboard routes from indexing
+# Block authenticated/private routes
 Disallow: /dashboard
+Disallow: /dashboard/*
 Disallow: /admin
+Disallow: /admin/*
 Disallow: /login
+Disallow: /login/*
 Disallow: /control-center
 
+# Block API routes if any
+Disallow: /api/
+
+# Crawl-delay (be polite to crawlers)
+Crawl-delay: 1
+
+# Sitemaps
 Sitemap: https://jntuk-student-library.vercel.app/sitemap.xml
+
+# Host
+Host: https://jntuk-student-library.vercel.app

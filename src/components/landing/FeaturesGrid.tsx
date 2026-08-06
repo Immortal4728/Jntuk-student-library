@@ -56,30 +56,28 @@ const features = [
 
 export default function FeaturesGrid() {
   return (
-    <section id="features" className="relative w-full bg-white overflow-hidden">
-      {/* Top gradient blend */}
-      <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-[#fafafa] to-transparent pointer-events-none" />
+    <section id="features" aria-label="Platform features" className="relative w-full bg-slate-50/50 overflow-hidden">
       {/* Background decorations */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full bg-gradient-to-br from-indigo-50/40 via-violet-50/20 to-transparent blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-slate-100/40 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 max-w-[1200px] mx-auto px-5 sm:px-8 lg:px-16 py-20 lg:py-28">
+      <div className="relative z-10 max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 py-14 lg:py-20">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }} transition={{ duration: 0.7 }}
-          className="text-center mb-14 lg:mb-20">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }} transition={{ duration: 0.6 }}
+          className="text-center mb-10 lg:mb-12">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-100/80 text-indigo-600 text-[11px] font-bold tracking-[0.15em] uppercase mb-6"
+            transition={{ duration: 0.4 }}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[11px] font-bold tracking-[0.12em] uppercase mb-4"
           >
-            <Zap size={12} className="text-indigo-500" />
+            <Zap size={12} className="text-blue-500" />
             Platform Features
           </motion.div>
-          <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-slate-900 tracking-tight mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight mb-3">
             Everything you need,{' '}
-            <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-blue-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               one ecosystem
             </span>
           </h2>
@@ -94,28 +92,26 @@ export default function FeaturesGrid() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
           {features.map((f) => (
             <motion.div key={f.title} variants={fadeUp}
-              whileHover={{ y: -8, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] as const } }}
-              className="group relative rounded-2xl border border-slate-200/80 bg-white p-6 transition-all duration-400 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] hover:border-slate-300/60 overflow-hidden">
-              
-              {/* Gradient overlay on hover */}
-              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                style={{ background: `radial-gradient(400px circle at 50% 0%, ${f.color}0d, transparent 70%)` }} />
+              whileHover={{ y: -4, transition: { duration: 0.25, ease: 'easeOut' } }}
+              className="group relative rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 transition-all duration-300 hover:shadow-[0_12px_30px_rgba(15,23,42,0.08)] hover:border-slate-300 overflow-hidden h-full flex flex-col justify-between">
               
               {/* Top accent line */}
               <motion.div
-                className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 style={{ background: `linear-gradient(90deg, transparent, ${f.color}, transparent)` }}
               />
 
-              <div className="relative z-10">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
-                  style={{ backgroundColor: `${f.color}10`, border: `1px solid ${f.color}18` }}>
-                  <f.icon size={22} style={{ color: f.color }} strokeWidth={1.5} />
+              <div className="relative z-10 flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 transition-all duration-200 group-hover:scale-105"
+                    style={{ backgroundColor: `${f.color}12`, border: `1px solid ${f.color}20` }}>
+                    <f.icon size={20} style={{ color: f.color }} strokeWidth={2} />
+                  </div>
+                  <h3 className="text-[15px] font-bold text-[#0F172A] mb-1.5 tracking-tight break-words">{f.title}</h3>
+                  <p className="text-[13px] text-slate-600 leading-relaxed mb-4 font-medium break-words">{f.description}</p>
                 </div>
-                <h3 className="text-[15px] font-semibold text-slate-900 mb-1.5 tracking-tight">{f.title}</h3>
-                <p className="text-[13px] text-slate-500 leading-relaxed mb-4 font-medium">{f.description}</p>
                 <Link to={f.link}
-                  className="inline-flex items-center gap-1 text-[12px] font-semibold transition-all duration-200 group-hover:gap-2"
+                  className="inline-flex items-center gap-1 text-[12px] font-bold transition-all duration-200 group-hover:gap-1.5 mt-auto"
                   style={{ color: f.color }}>
                   Explore <ChevronRight size={13} className="transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Link>

@@ -1,0 +1,20 @@
+{
+  "name": "JNTUK Library — Study Materials & Academic Dashboard",
+  "short_name": "JNTUK Library",
+  "description": "Access JNTUK semester-wise study materials, SGPA/CGPA calculators, backlog tracking, and academic analytics — all in one platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0F172A",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

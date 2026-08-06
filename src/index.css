@@ -16,6 +16,30 @@
   box-sizing: border-box;
 }
 
+/* === Accessibility: Focus Visible Ring === */
+:focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove focus outline for mouse/touch interactions */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* === Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 :root {
   /* Easing */
   --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
@@ -815,41 +839,40 @@ html[data-theme="light"] .glass-light {
   border-color: #e5e7eb !important;
 }
 
-/* ── Main content text ── */
-html[data-theme="light"] .text-white {
-  color: #1e293b !important;
-}
-/* Preserve white text inside gradient buttons & gradient icon boxes */
-html[data-theme="light"] button[class*="from-violet"] .text-white,
-html[data-theme="light"] [class*="from-violet-600"][class*="to-purple"] .text-white,
-html[data-theme="light"] .w-10.h-10[class*="from-"] .text-white,
-html[data-theme="light"] .w-9.h-9[class*="from-"] .text-white,
-html[data-theme="light"] [class*="bg-gradient"][class*="from-violet"] .text-white,
-html[data-theme="light"] [class*="bg-gradient"][class*="from-blue"] .text-white,
-html[data-theme="light"] [class*="bg-gradient"][class*="from-amber"] .text-white,
-html[data-theme="light"] [class*="bg-gradient"][class*="from-emerald"] .text-white,
-html[data-theme="light"] [class*="bg-gradient"][class*="from-pink"] .text-white,
-html[data-theme="light"] [class*="bg-gradient"][class*="from-indigo"] .text-white,
-html[data-theme="light"] button[class*="from-violet-600"] *,
-html[data-theme="light"] .btn-primary {
-  color: #ffffff !important;
-}
-/* Feature card icon boxes should keep white icons */
-html[data-theme="light"] .w-10.h-10.rounded-xl[class*="bg-gradient"] * {
-  color: #ffffff !important;
-}
+/* ── Main content text & light mode contrast fixes ── */
 
+/* Maintain proper contrast for slate text classes in light mode */
 html[data-theme="light"] .text-slate-300 {
-  color: #475569 !important;
+  color: #475569;
 }
 html[data-theme="light"] .text-slate-400 {
-  color: #64748b !important;
+  color: #475569;
 }
 html[data-theme="light"] .text-slate-500 {
-  color: #94a3b8 !important;
+  color: #475569;
 }
 html[data-theme="light"] .text-slate-600 {
-  color: #94a3b8 !important;
+  color: #334155;
+}
+
+/* Ensure dark elements (dark cards, dark buttons, dark widgets, dark banners) maintain white/light text in light mode */
+html[data-theme="light"] .bg-slate-900 .text-white,
+html[data-theme="light"] .bg-slate-900 .text-slate-300,
+html[data-theme="light"] .bg-slate-900 .text-slate-400,
+html[data-theme="light"] [class*="bg-slate-900"] .text-white,
+html[data-theme="light"] [class*="bg-slate-900"] .text-slate-300,
+html[data-theme="light"] [class*="bg-slate-900"] .text-slate-400,
+html[data-theme="light"] [class*="bg-navy-"] .text-white,
+html[data-theme="light"] [class*="bg-navy-"] .text-slate-300,
+html[data-theme="light"] [class*="bg-navy-"] .text-slate-400,
+html[data-theme="light"] [class*="bg-[#0f172a]"] .text-white,
+html[data-theme="light"] [class*="bg-indigo-600"] .text-white,
+html[data-theme="light"] [class*="from-indigo-600"] .text-white,
+html[data-theme="light"] [class*="from-violet-600"] .text-white,
+html[data-theme="light"] button[class*="bg-slate-900"] *,
+html[data-theme="light"] button[class*="from-"] *,
+html[data-theme="light"] .btn-primary * {
+  color: inherit;
 }
 
 /* ── Hero section ── */
@@ -867,7 +890,7 @@ html[data-theme="light"] [class*="from-amber-600\\/10"] {
 }
 
 /* ── Progress bar track ── */
-html[data-theme="light"] .w-full.h-2\\.5.rounded-full[class*="bg-white"] {
+html[data-theme="light"] [class*="h-2.5"][class*="bg-white"] {
   background: rgba(0, 0, 0, 0.06) !important;
 }
 

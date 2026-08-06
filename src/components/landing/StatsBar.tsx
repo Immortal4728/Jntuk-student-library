@@ -34,7 +34,7 @@ const stats = [
 
 export default function StatsBar() {
   return (
-    <section className="relative w-full bg-slate-900 overflow-hidden">
+    <section aria-label="Platform statistics" className="relative w-full bg-slate-900 overflow-hidden">
       <div className="absolute inset-0 opacity-[0.03]" style={{
         backgroundImage: 'linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)',
         backgroundSize: '48px 48px',

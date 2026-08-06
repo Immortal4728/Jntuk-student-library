@@ -1,56 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="google-site-verification" content="oWySz4N_EjiGkuDDDqcxlS0fEDQfrmK1Mpv2lViyUGA" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-  <!-- Primary SEO Meta Tags -->
-  <title>JNTUK Library | Study Materials, SGPA/CGPA Calculator, Academic Dashboard</title>
+  <!-- Google Site Verification -->
+  <meta name="google-site-verification" content="oWySz4N_EjiGkuDDDqcxlS0fEDQfrmK1Mpv2lViyUGA" />
+
+  <!-- Primary SEO Meta Tags (Optimized for "JNTUK R23 Materials" & "JNTUK CGPA Calculator") -->
+  <title>JNTUK R23 Materials, SGPA &amp; CGPA Calculator | JNTUK Library</title>
   <meta name="description"
-    content="Your complete JNTUK academic platform. Access study materials, PYQs, SGPA/CGPA calculators, backlog tracking, and academic analytics in one modern ecosystem." />
+    content="Free JNTUK R23 regulation study materials, unit-wise notes, previous year question papers (PYQs), and instant SGPA &amp; CGPA calculator for JNTUK CSE, ECE, IT, and AIML students." />
   <meta name="keywords"
-    content="JNTUK materials, SGPA calculator, CGPA tracker, JNTUK notes, PYQs, backlog tracker, academic dashboard, JNTU Kakinada, R23 regulation, semester analytics, student portal" />
+    content="JNTUK R23 materials, JNTUK CGPA calculator, JNTUK SGPA calculator, JNTUK R23 notes, JNTUK previous question papers, JNTUK R23 syllabus, JNTUK grade calculator, JNTUK SGPA to percentage, JNTUK CSE R23 materials, JNTUK ECE R23 materials, JNTUK Library, JNTU Kakinada materials" />
   <meta name="author" content="Rishi Chowdary" />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="google" content="notranslate" />
   <link rel="canonical" href="https://jntuk-student-library.vercel.app/" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://jntuk-student-library.vercel.app/" />
-  <meta property="og:title" content="JNTUK Library | Study Materials, SGPA/CGPA Calculator & Academic Tools" />
+  <meta property="og:title" content="JNTUK R23 Materials, SGPA &amp; CGPA Calculator | JNTUK Library" />
   <meta property="og:description"
-    content="Access study materials, calculate SGPA/CGPA, track backlogs, and manage your academic journey in one platform." />
+    content="Download JNTUK R23 regulation notes, PYQs, and calculate SGPA &amp; CGPA with backlog tracking for CSE, ECE, IT &amp; AIML." />
   <meta property="og:site_name" content="JNTUK Library" />
+  <meta property="og:image" content="https://jntuk-student-library.vercel.app/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="JNTUK R23 Materials &amp; CGPA Calculator" />
+  <meta property="og:locale" content="en_IN" />
 
-  <!-- Twitter -->
+  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="JNTUK Library | Study Materials, SGPA/CGPA Calculator & Academic Tools" />
+  <meta name="twitter:title" content="JNTUK R23 Materials, SGPA &amp; CGPA Calculator | JNTUK Library" />
   <meta name="twitter:description"
-    content="Access study materials, calculate SGPA/CGPA, track backlogs, and manage your academic journey in one platform." />
+    content="Download JNTUK R23 regulation notes, PYQs, and calculate SGPA &amp; CGPA with backlog tracking for CSE, ECE, IT &amp; AIML." />
+  <meta name="twitter:image" content="https://jntuk-student-library.vercel.app/og-image.png" />
+  <meta name="twitter:image:alt" content="JNTUK R23 Materials &amp; CGPA Calculator" />
+
+  <!-- Favicon & App Icons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
 
   <!-- Theme & PWA -->
-  <meta name="theme-color" content="#2563eb" />
+  <meta name="theme-color" content="#0F172A" />
+  <meta name="color-scheme" content="light" />
   <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="JNTUK R23 Materials &amp; CGPA Calculator" />
+  <meta name="application-name" content="JNTUK Library" />
+  <link rel="manifest" href="/manifest.webmanifest" />
 
-  <!-- Fonts -->
+  <!-- DNS Prefetch & Preconnect -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Font Loading -->
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" />
   <link
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
 
-  <!-- Structured Data (JSON-LD) for Google Rich Results -->
+  <!-- Structured Data (JSON-LD) for Search Snippets -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "JNTUK Library",
-    "alternateName": "JNTUK Student Library",
+    "name": "JNTUK R23 Materials & CGPA Calculator",
+    "alternateName": [
+      "JNTUK R23 Materials",
+      "JNTUK CGPA Calculator",
+      "JNTUK SGPA Calculator",
+      "JNTUK Library",
+      "JNTU Kakinada Study Portal"
+    ],
     "url": "https://jntuk-student-library.vercel.app/",
-    "description": "Access JNTUK semester-wise materials, PYQs, notes, and important questions for CSE, ECE, IT, AIML students.",
+    "description": "Centralized JNTUK portal for R23 regulation study materials, notes, PYQs, and instant SGPA/CGPA grade calculation.",
+    "inLanguage": "en",
     "potentialAction": {
       "@type": "SearchAction",
       "target": "https://jntuk-student-library.vercel.app/materials?q={search_term_string}",
@@ -64,10 +98,34 @@
     "@type": "EducationalOrganization",
     "name": "JNTUK Library",
     "url": "https://jntuk-student-library.vercel.app/",
-    "description": "A centralized platform for JNTUK students to access semester-wise materials, notes, and previous question papers.",
+    "logo": "https://jntuk-student-library.vercel.app/favicon.svg",
+    "description": "Centralized academic hub for JNTUK students providing R23 regulation materials, notes, PYQs, and SGPA/CGPA calculators.",
     "sameAs": [
       "https://github.com/Immortal4728/Jntuk-student-library"
-    ]
+    ],
+    "foundingDate": "2024",
+    "founder": {
+      "@type": "Person",
+      "name": "Rishi Chowdary"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "JNTUK CGPA & SGPA Calculator — JNTUK R23 Materials Hub",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web",
+    "url": "https://jntuk-student-library.vercel.app/",
+    "description": "Calculate JNTUK SGPA/CGPA under R23 regulation, track backlogs, and download branch-wise study materials.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR"
+    },
+    "screenshot": "https://jntuk-student-library.vercel.app/og-image.png",
+    "featureList": "JNTUK R23 Materials, JNTUK SGPA Calculator, JNTUK CGPA Calculator, Backlog Tracker, Previous Question Papers"
   }
   </script>
 </head>

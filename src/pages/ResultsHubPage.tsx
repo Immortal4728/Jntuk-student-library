@@ -1,4 +1,5 @@
 import { ExternalLink, Ribbon } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function ResultsHubPage() {
   const results = [
@@ -11,6 +12,12 @@ export default function ResultsHubPage() {
 
   return (
     <div className="bg-[#f8fafc] min-h-full font-sans pb-24 md:pb-8 flex flex-col space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-6 md:p-8 md:m-0 -m-4 md:rounded-[2.5rem]">
+      <SEO
+        title="JNTUK Results Hub — Semester Wise Result Links"
+        description="Fast access to official JNTUK semester results links for 1-1, 1-2, 2-1, 2-2, 3-1 semesters under R23 regulation."
+        keywords="JNTUK results, JNTUK semester results, JNTUK R23 results, JNTU Kakinada results link"
+        canonicalUrl="/dashboard/results"
+      />
       {/* ── HEADER ── */}
       <div className="flex flex-col gap-1.5">
         <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">

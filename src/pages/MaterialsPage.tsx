@@ -43,10 +43,14 @@ export default function MaterialsPage() {
   return (
     <div className="bg-[#f8fafc] min-h-[calc(100vh-4rem)]">
       <SEO
-        title="JNTUK Materials - Semester Wise Resources"
-        description="Browse JNTUK semester-wise study materials by branch — CSE, ECE, IT, AIML. Download notes, PYQs, and important questions for R23 regulation."
-        keywords="JNTUK materials, CSE materials, ECE materials, IT materials, AIML materials, JNTUK branch wise notes, R23 regulation materials"
+        title="JNTUK Study Materials — Branch-Wise Notes, PYQs & Resources"
+        description="Browse JNTUK semester-wise study materials organized by branch — CSE, ECE, IT, AIML. Download unit-wise notes, previous year question papers (PYQs), and important questions for R23 regulation. Free for all JNTUK students."
+        keywords="JNTUK materials, JNTUK study materials, CSE materials, ECE materials, IT materials, AIML materials, JNTUK branch wise notes, R23 regulation materials, JNTUK previous question papers, JNTUK notes download"
         canonicalUrl="/materials"
+        breadcrumbs={[
+          { name: 'Home', url: '/' },
+          { name: 'Materials', url: '/materials' },
+        ]}
       />
       <div className="max-w-3xl mx-auto px-5 pt-12 pb-24 md:pt-16 md:pb-28">
 

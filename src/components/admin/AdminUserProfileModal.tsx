@@ -110,8 +110,8 @@ export default function AdminUserProfileModal({ user, onClose }: AdminUserProfil
                   </div>
                 )}
               </div>
-              <h2 className="text-xl font-black text-slate-900 tracking-tight">{user.name || "Anonymous User"}</h2>
-              <p className="text-sm font-medium text-slate-500 mt-0.5">{user.email || "No Email"}</p>
+              <h2 className="text-xl font-black text-slate-900 tracking-tight break-words w-full">{user.name || "Anonymous User"}</h2>
+              <p className="text-sm font-medium text-slate-500 mt-0.5 break-words w-full">{user.email || "No Email"}</p>
               
               <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
                 <span className="px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">

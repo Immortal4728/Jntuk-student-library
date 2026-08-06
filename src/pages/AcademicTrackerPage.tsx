@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import SEO from "../components/SEO";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import {
@@ -366,6 +367,12 @@ export default function AcademicTrackerPage() {
 
   return (
     <div className="space-y-6 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <SEO
+        title="JNTUK CGPA Calculator & SGPA Calculator — R23 Regulation"
+        description="Calculate your JNTUK SGPA & CGPA online under R23 regulation. Instant grade point calculation, credit tracking, backlog management, and grade report export."
+        keywords="JNTUK CGPA calculator, JNTUK SGPA calculator, JNTUK R23 CGPA calculator, JNTUK grade calculator, JNTUK SGPA to percentage, JNTUK CGPA formula"
+        canonicalUrl="/dashboard/tracker"
+      />
       {/* ─── HEADER ─── */}
       <header className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 p-6 shadow-xl">
         <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-[60px] -mr-10 -mt-10" />

@@ -56,10 +56,14 @@ export default function AboutPage() {
   return (
     <div className="bg-[#f8fafc] min-h-[calc(100vh-4rem)] relative overflow-hidden">
       <SEO
-        title="About JNTUK Library - Student Materials Platform"
-        description="Learn about JNTUK Library — a centralized platform for JNTUK students to access semester-wise materials, notes, PYQs, and important questions. Built by Rishi Chowdary."
-        keywords="about JNTUK library, JNTUK student platform, JNTU Kakinada materials platform, engineering study resources"
+        title="About JNTUK Library — Academic Study Platform for JNTUK Students"
+        description="Learn about JNTUK Library — a free, centralized academic platform for JNTUK students. Access semester-wise materials, notes, PYQs, SGPA/CGPA calculators, and academic analytics. Built by Rishi Chowdary for JNTU Kakinada R23 regulation students."
+        keywords="about JNTUK library, JNTUK student platform, JNTU Kakinada materials platform, engineering study resources, JNTUK academic portal, Rishi Chowdary"
         canonicalUrl="/about"
+        breadcrumbs={[
+          { name: 'Home', url: '/' },
+          { name: 'About', url: '/about' },
+        ]}
       />
       {/* Subtle Grid Background */}
       <div

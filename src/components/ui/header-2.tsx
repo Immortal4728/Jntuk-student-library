@@ -36,7 +36,7 @@ export function Header() {
 					'sticky top-0 z-40 w-full transition-all duration-300 ease-out bg-white/70 backdrop-blur-xl border-b border-gray-100/80 shadow-[0_4px_24px_rgba(0,0,0,0.01)]',
 				)}
 			>
-				<nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-8 relative">
+				<nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-8 relative" aria-label="Main navigation">
 					
 					{/* LEFT: LOGO */}
 					<Link 

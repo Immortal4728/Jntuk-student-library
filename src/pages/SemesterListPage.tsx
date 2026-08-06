@@ -71,10 +71,15 @@ export default function SemesterListPage() {
   return (
     <div className="bg-[#f8fafc] min-h-[calc(100vh-4rem)] selection:bg-[#0f172a] selection:text-white">
       <SEO
-        title={`JNTUK ${branch?.toUpperCase()} Materials | Semester Wise Notes & PYQs`}
-        description={`Access JNTUK ${branch?.toUpperCase()} semester-wise materials, notes, PYQs, and important questions. R23 Regulation. All years available.`}
-        keywords={`JNTUK ${branch?.toUpperCase()} materials, ${branch?.toUpperCase()} notes, ${branch?.toUpperCase()} PYQs, JNTUK ${branch?.toUpperCase()} semester wise, R23 ${branch?.toUpperCase()}`}
+        title={`JNTUK ${branch?.toUpperCase()} Materials — Semester-Wise Notes, PYQs & Resources`}
+        description={`Download JNTUK ${branch?.toUpperCase()} semester-wise study materials, unit-wise notes, previous year question papers (PYQs), and important questions. R23 Regulation. All years and semesters available for free.`}
+        keywords={`JNTUK ${branch?.toUpperCase()} materials, ${branch?.toUpperCase()} notes, ${branch?.toUpperCase()} PYQs, ${branch?.toUpperCase()} previous question papers, JNTUK ${branch?.toUpperCase()} semester wise, R23 ${branch?.toUpperCase()}, JNTUK ${branch?.toUpperCase()} study materials`}
         canonicalUrl={`/materials/${branch}`}
+        breadcrumbs={[
+          { name: 'Home', url: '/' },
+          { name: 'Materials', url: '/materials' },
+          { name: branch?.toUpperCase() || 'CSE', url: `/materials/${branch}` },
+        ]}
       />
       {/* Sticky top branch selector / header */}
       <div className="sticky top-16 z-20 bg-white/70 backdrop-blur-xl border-b border-slate-200/60 px-5 py-4">
